@@ -5,7 +5,10 @@ import {
   IsOptional,
   IsArray,
   IsObject,
+  ValidateNested,
 } from 'class-validator';
+import { FormFieldDto } from './form-field.dto';
+import { Type } from 'class-transformer';
 
 const conditionalLogicSchema = Joi.object({
   fieldId: Joi.string().required(),
@@ -36,7 +39,9 @@ export class CreateFormDto {
 
   @IsArray()
   @IsOptional()
-  fields: any[];
+  @ValidateNested({ each: true })
+  @Type(() => FormFieldDto)
+  fields: FormFieldDto[];
 
   @IsObject()
   @IsOptional()

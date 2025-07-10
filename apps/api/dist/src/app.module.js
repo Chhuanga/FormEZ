@@ -13,9 +13,10 @@ const app_controller_1 = require("./app/app.controller");
 const app_service_1 = require("./app/app.service");
 const prisma_module_1 = require("./prisma/prisma.module");
 const forms_module_1 = require("./forms/forms.module");
-const submissions_module_1 = require("./submissions.module");
+const submissions_module_1 = require("./submissions/submissions.module");
 const files_module_1 = require("./files/files.module");
 const integrations_module_1 = require("./integrations/integrations.module");
+const ai_module_1 = require("./ai/ai.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -31,6 +32,7 @@ exports.AppModule = AppModule = __decorate([
             submissions_module_1.SubmissionsModule,
             files_module_1.FilesModule,
             integrations_module_1.IntegrationsModule,
+            ai_module_1.AiModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
