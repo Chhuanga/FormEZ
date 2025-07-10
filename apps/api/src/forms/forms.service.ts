@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFormDto } from './dto/create-form.dto';
 import { UpdateFormDto } from './dto/update-form.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { IntegrationsService } from 'src/integrations/integrations.service';
 
 @Injectable()
 export class FormsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private integrationsService: IntegrationsService,
+  ) {}
 
   async create(createFormDto: CreateFormDto, userId: string) {
     // Ensure a user record exists before creating a form linked to it.
@@ -154,5 +158,35 @@ export class FormsService {
     });
 
     return { message: 'Form deleted successfully' };
+  }
+
+  async findSubmissions(formId: string, userId: string) {
+    const form = await this.prisma.form.findUnique({
+      where: { id: formId, userId: userId },
+      include: {
+        submissions: {
+          include: {
+            answers: {
+              include: {
+                file: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!form) {
+      throw new NotFoundException(
+        'Form not found or you do not have permission to view its submissions.',
+      );
+    }
+    return form;
+  }
+
+  getIntegrations(formId: string, userId: string) {
+    // This reuses the permission logic from integrationsService
+    return this.integrationsService.findAllByFormId(formId, userId);
   }
 }

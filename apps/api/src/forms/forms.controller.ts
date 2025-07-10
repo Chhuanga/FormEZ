@@ -71,4 +71,22 @@ export class FormsController {
   remove(@Param('id') id: string, @CurrentUser() user: DecodedIdToken) {
     return this.formsService.remove(id, user.uid);
   }
+
+  @Get(':id/submissions')
+  @UseGuards(FirebaseGuard)
+  findSubmissions(
+    @Param('id') id: string,
+    @CurrentUser() user: DecodedIdToken,
+  ) {
+    return this.formsService.findSubmissions(id, user.uid);
+  }
+
+  @Get(':id/integrations')
+  @UseGuards(FirebaseGuard)
+  getIntegrations(
+    @Param('id') id: string,
+    @CurrentUser() user: DecodedIdToken,
+  ) {
+    return this.formsService.getIntegrations(id, user.uid);
+  }
 }

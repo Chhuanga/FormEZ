@@ -18,6 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   forms     Form[]
+  accounts  Account[]
 }
 
 model Form {
@@ -29,11 +30,11 @@ model Form {
   theme     Json        @default("{}")
   postSubmissionSettings Json @default("{\"type\":\"message\",\"message\":\"Thanks for your submission!\"}")
 
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
+  userId String?
+  user   User?    @relation(fields: [userId], references: [id])
   submissions FormSubmission[]
   views       FormView[]
+  integrations Integration[]
 }
 
 model FormView {
@@ -81,4 +82,35 @@ model File {
 
   answer   Answer @relation(fields: [answerId], references: [id])
   answerId String @unique
+}
+
+// Authentication & Integrations
+model Account {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  type         String // e.g., 'MAILCHIMP', 'GOOGLE'
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  scope        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  integrations Integration[]
+
+  @@unique([userId, type])
+}
+
+model Integration {
+  id        String   @id @default(cuid())
+  type      String // e.g., 'MAILCHIMP', 'ZAPIER'
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  config    Json // Store API keys, list IDs, etc.
+
+  @@unique([formId, type, accountId])
 }
