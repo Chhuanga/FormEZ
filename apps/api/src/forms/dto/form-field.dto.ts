@@ -31,6 +31,14 @@ class FieldValidationDto {
   maxLength?: number;
 }
 
+class OptionDto {
+  @IsString()
+  label: string;
+
+  @IsString()
+  value: string;
+}
+
 export class FormFieldDto {
   @IsString()
   id: string;
@@ -53,6 +61,7 @@ export class FormFieldDto {
 
   @IsArray()
   @IsOptional()
-  @IsString({ each: true })
-  options?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => OptionDto)
+  options?: (string | OptionDto)[];
 }

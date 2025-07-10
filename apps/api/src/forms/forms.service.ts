@@ -19,7 +19,7 @@ export class FormsService {
     return this.prisma.form.create({
       data: {
         title: createFormDto.title,
-        fields: (createFormDto.fields as Prisma.JsonArray) || [],
+        fields: (createFormDto.fields as unknown as Prisma.JsonArray) || [],
         theme: (createFormDto.theme as Prisma.JsonObject) || {},
         postSubmissionSettings:
           (createFormDto.postSubmissionSettings as Prisma.JsonObject) ||
@@ -87,7 +87,7 @@ export class FormsService {
       where: { id },
       data: {
         title: updateFormDto.title,
-        fields: updateFormDto.fields as Prisma.JsonArray,
+        fields: updateFormDto.fields as unknown as Prisma.JsonArray,
         theme: updateFormDto.theme as Prisma.JsonObject,
         postSubmissionSettings:
           (updateFormDto.postSubmissionSettings as Prisma.JsonObject) ||

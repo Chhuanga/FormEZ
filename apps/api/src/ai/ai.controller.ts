@@ -15,9 +15,6 @@ export class AiController {
     @Body() body: GenerateFormWithAiDto,
     @CurrentUser() user: DecodedIdToken,
   ) {
-    // We are passing the full DecodedIdToken, but the service only needs the id.
-    // The service will need to be updated to reflect this.
-    // For now, we cast to `any` to make it work.
-    return this.aiService.generateFormFromPrompt(body.prompt, user as any);
+    return this.aiService.generateFormOrRefinementQuestions(body, user);
   }
 }
