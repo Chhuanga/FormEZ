@@ -29,7 +29,6 @@ COPY apps/api/src ./apps/api/src
 COPY apps/api/tsconfig.json ./apps/api/
 COPY apps/api/tsconfig.build.json ./apps/api/
 COPY apps/api/nest-cli.json ./apps/api/
-COPY tsconfig.json .
 
 # Copy the entrypoint script and make it executable
 COPY apps/api/entrypoint.sh .
