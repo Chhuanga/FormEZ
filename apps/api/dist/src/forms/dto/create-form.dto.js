@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateFormDto = void 0;
 const Joi = require("joi");
 const class_validator_1 = require("class-validator");
+const form_field_dto_1 = require("./form-field.dto");
+const class_transformer_1 = require("class-transformer");
 const conditionalLogicSchema = Joi.object({
     fieldId: Joi.string().required(),
     operator: Joi.string().required(),
@@ -53,6 +55,8 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => form_field_dto_1.FormFieldDto),
     __metadata("design:type", Array)
 ], CreateFormDto.prototype, "fields", void 0);
 __decorate([

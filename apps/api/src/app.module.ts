@@ -4,9 +4,10 @@ import { AppController } from './app/app.controller';
 import { AppService } from './app/app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { FormsModule } from './forms/forms.module';
-import { SubmissionsModule } from './submissions.module';
+import { SubmissionsModule } from './submissions/submissions.module';
 import { FilesModule } from './files/files.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
     SubmissionsModule,
     FilesModule,
     IntegrationsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

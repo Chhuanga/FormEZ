@@ -11,8 +11,8 @@ echo "PostgreSQL started"
 
 # Run Prisma migrations to keep the database schema up to date.
 echo "Running Prisma migrations..."
-pnpm exec prisma migrate deploy
+pnpm --filter ./apps/api exec prisma migrate deploy
 
 # Start the application in development mode with hot-reloading.
 echo "Starting API server..."
-pnpm start:dev 
+pnpm --filter ./apps/api start:dev 

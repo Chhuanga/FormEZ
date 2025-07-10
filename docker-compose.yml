@@ -24,6 +24,10 @@ services:
       - '3001:3001'
     environment:
       DATABASE_URL: ${DATABASE_URL}
+    
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
     depends_on:
       db:
         condition: service_healthy
