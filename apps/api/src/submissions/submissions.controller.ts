@@ -14,11 +14,11 @@ import { FirebaseGuard } from '../auth/firebase.guard';
 import { CurrentUser } from '../auth/auth.decorators';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
-@Controller('submissions')
+@Controller('forms/:formId/submissions')
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
-  @Post(':formId')
+  @Post()
   create(
     @Param('formId') formId: string,
     @Body() createSubmissionDto: CreateSubmissionDto,
@@ -26,7 +26,7 @@ export class SubmissionsController {
     return this.submissionsService.create(formId, createSubmissionDto);
   }
 
-  @Get('form/:formId')
+  @Get()
   @UseGuards(FirebaseGuard)
   findByFormId(
     @Param('formId') formId: string,
@@ -36,7 +36,7 @@ export class SubmissionsController {
     return this.submissionsService.findByFormId(formId, userId);
   }
 
-  @Get('analytics/:formId')
+  @Get('analytics')
   @UseGuards(FirebaseGuard)
   getAnalytics(
     @Param('formId') formId: string,
