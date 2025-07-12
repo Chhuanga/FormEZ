@@ -51,8 +51,8 @@ export default function NewFormPage() {
   return (
     <div className="max-w-4xl mx-auto p-8">
       <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold">How do you want to start?</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-4xl font-bold text-black">How do you want to start?</h1>
+        <p className="text-gray-600 mt-3 text-lg">
           Create a form with AI or start from scratch.
         </p>
       </div>
@@ -62,27 +62,27 @@ export default function NewFormPage() {
       </div>
 
       <div className="relative my-12">
-        <Separator />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 bg-background">
-          <span className="text-sm text-muted-foreground">Or</span>
+        <Separator className="bg-gray-200" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 bg-gray-50">
+          <span className="text-sm text-gray-500 font-medium">Or</span>
         </div>
       </div>
 
       <div className="flex justify-center">
           <div
-          className="border rounded-lg p-6 flex flex-col items-center text-center hover:shadow-md hover:border-primary hover:scale-[1.01] transition-all cursor-pointer w-full max-w-sm"
+          className="border border-gray-200 rounded-xl p-8 flex flex-col items-center text-center hover:shadow-lg hover:border-gray-300 hover:scale-[1.02] transition-all duration-300 cursor-pointer w-full max-w-sm bg-white"
           onClick={handleCreateBlankForm}
           >
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <FileText className="h-8 w-8 text-muted-foreground" />
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <FileText className="h-10 w-10 text-gray-400" />
             </div>
-          <h2 className="text-lg font-semibold">Start from Scratch</h2>
-            <p className="text-sm text-muted-foreground mt-1 flex-grow">
-            Begin with a completely blank form.
+          <h2 className="text-xl font-semibold text-black mb-2">Start from Scratch</h2>
+            <p className="text-sm text-gray-600 mt-1 flex-grow leading-relaxed">
+            Begin with a completely blank form and build exactly what you need.
             </p>
             <Button 
               variant="ghost" 
-              className="mt-4 w-full"
+              className="mt-6 w-full bg-black text-white hover:bg-gray-800 border-0 h-11"
             disabled={creating}
             >
             {creating ? (

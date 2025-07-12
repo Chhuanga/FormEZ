@@ -275,18 +275,18 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">My Forms</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-black">My Forms</h1>
+            <p className="text-gray-600 mt-2">
               {forms.length === 0 
                 ? 'Create and manage your forms' 
                 : `Managing ${forms.length} form${forms.length !== 1 ? 's' : ''} • ${filteredAndSortedForms.length} shown`
               }
             </p>
           </div>
-          <Button asChild className="h-9 px-4">
+          <Button asChild className="h-10 px-6 bg-black hover:bg-gray-800 text-white border-0 font-medium">
             <Link href="/dashboard/new" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               New Form
@@ -295,25 +295,25 @@ export default function DashboardPage() {
         </div>
         
         {/* Search and Controls Bar */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-muted/30 rounded-lg border">
+        <div className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
           <div className="relative flex-1 w-full sm:max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search forms..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-9"
+              className="pl-10 h-10 border-gray-200 focus:border-black focus:ring-black/20"
             />
           </div>
           
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <SortAsc className="h-4 w-4 text-muted-foreground" />
+              <SortAsc className="h-4 w-4 text-gray-500" />
               <Select value={sortBy} onValueChange={(value: 'date' | 'name' | 'responses') => setSortBy(value)}>
-                <SelectTrigger className="w-32 h-9">
+                <SelectTrigger className="w-32 h-10 border-gray-200 focus:border-black">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-gray-200">
                   <SelectItem value="date">Date</SelectItem>
                   <SelectItem value="name">Name</SelectItem>
                   <SelectItem value="responses">Responses</SelectItem>
@@ -322,12 +322,12 @@ export default function DashboardPage() {
             </div>
             
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Filter className="h-4 w-4 text-gray-500" />
               <Select value={filterStatus} onValueChange={(value: 'all' | 'draft' | 'live') => setFilterStatus(value)}>
-                <SelectTrigger className="w-24 h-9">
+                <SelectTrigger className="w-24 h-10 border-gray-200 focus:border-black">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-gray-200">
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="live">Live</SelectItem>
@@ -341,15 +341,15 @@ export default function DashboardPage() {
       {/* Forms Grid */}
       {filteredAndSortedForms.length === 0 ? (
         forms.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-border rounded-lg bg-accent/50">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <FileText className="h-8 w-8 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-gray-300 rounded-2xl bg-white">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <FileText className="h-10 w-10 text-gray-400" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">No forms yet</h2>
-            <p className="text-muted-foreground mb-6 max-w-md">
+            <h2 className="text-2xl font-semibold mb-3 text-black">No forms yet</h2>
+            <p className="text-gray-600 mb-8 max-w-md leading-relaxed">
               Get started by creating your first form. Build beautiful, responsive forms in minutes.
             </p>
-            <Button asChild>
+            <Button asChild className="bg-black hover:bg-gray-800 text-white border-0 h-11 px-6">
               <Link href="/dashboard/new" className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Create your first form
@@ -357,69 +357,76 @@ export default function DashboardPage() {
             </Button>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <Search className="h-10 w-10 text-gray-400" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">No forms found</h2>
-            <p className="text-muted-foreground mb-6 max-w-md">
+            <h2 className="text-2xl font-semibold mb-3 text-black">No forms found</h2>
+            <p className="text-gray-600 mb-8 max-w-md leading-relaxed">
               Try adjusting your search or filter criteria to find the forms you're looking for.
             </p>
-            <Button variant="outline" onClick={() => { setSearchTerm(''); setFilterStatus('all'); }}>
+            <Button variant="outline" onClick={() => { setSearchTerm(''); setFilterStatus('all'); }} className="border-gray-300 text-black hover:bg-gray-50">
               Clear filters
             </Button>
           </div>
         )
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredAndSortedForms.map((form) => (
             <div
               key={form.id}
-              className={`group bg-card border rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-border/80 flex flex-col justify-between ${
+              className={`group bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-gray-300 flex flex-col justify-between ${
                 (form.analytics?.completionRate || 0) > 80 && form.submissionCount > 5 
-                  ? 'border-primary/20 bg-primary/5' 
-                  : 'border-border'
+                  ? 'border-black/20 bg-gray-50/50' 
+                  : ''
               }`}
             >
               <Link href={`/form/${form.id}/submissions?from=dashboard`} className="cursor-pointer">
                 {/* Form Header */}
-                <div className="mb-3">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-card-foreground text-base mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                <div className="mb-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-semibold text-black text-lg mb-1 group-hover:text-gray-700 transition-colors line-clamp-2 leading-tight">
                       {form.title}
                     </h3>
-                    <Badge variant={form.status === 'live' ? 'default' : 'secondary'} className="ml-2 text-xs">
+                    <Badge 
+                      variant={form.status === 'live' ? 'default' : 'secondary'} 
+                      className={`ml-2 text-xs ${
+                        form.status === 'live' 
+                          ? 'bg-black text-white hover:bg-gray-800' 
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
                       {form.status}
                     </Badge>
                   </div>
                   
                   {/* Key Metrics */}
-                  <div className="space-y-2 mb-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <FileText className="h-3 w-3" />
-                        <span>{form.submissionCount} response{form.submissionCount !== 1 ? 's' : ''}</span>
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <FileText className="h-4 w-4" />
+                        <span className="font-medium">{form.submissionCount} response{form.submissionCount !== 1 ? 's' : ''}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Target className="h-3 w-3" />
-                        <span>{form.analytics?.completionRate || 0}% complete</span>
+                      <div className="flex items-center gap-1.5 text-gray-600">
+                        <Target className="h-4 w-4" />
+                        <span className="font-medium">{form.analytics?.completionRate || 0}% complete</span>
                       </div>
                     </div>
                     
                     {/* Activity Sparkline */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <TrendingUp className="h-3 w-3" />
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <TrendingUp className="h-4 w-4" />
                         <span>7-day activity</span>
                       </div>
                       <MiniSparkline 
                         data={form.analytics?.submissionTrend || []} 
-                        className="text-primary"
+                        className="text-black"
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-1 text-xs text-muted-foreground border-t border-border pt-2">
+                  <div className="space-y-2 text-sm text-gray-500 border-t border-gray-200 pt-3">
                     <div className="flex items-center justify-between">
                       <span>{form.fields.length} field{form.fields.length !== 1 ? 's' : ''}</span>
                       <span>By {form.lastModifiedBy}</span>
@@ -431,16 +438,16 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Compact Form Preview */}
-                <div className="mb-3">
-                  <div className="bg-muted/20 rounded-md p-1.5 space-y-1">
+                <div className="mb-4">
+                  <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                     {form.fields.slice(0, 1).map((field, index) => (
-                      <div key={index} className="flex items-center gap-1.5">
-                        <div className="w-1 h-1 bg-muted-foreground/40 rounded-full flex-shrink-0"></div>
-                        <div className="h-1 bg-muted-foreground/20 rounded flex-1"></div>
+                      <div key={index} className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></div>
+                        <div className="h-1.5 bg-gray-300 rounded flex-1"></div>
                       </div>
                     ))}
                     {form.fields.length > 1 && (
-                      <div className="text-xs text-muted-foreground text-center">
+                      <div className="text-xs text-gray-500 text-center pt-1">
                         +{form.fields.length - 1} more field{form.fields.length - 1 !== 1 ? 's' : ''}
                       </div>
                     )}
@@ -449,27 +456,27 @@ export default function DashboardPage() {
               </Link>
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   asChild
-                  className="flex-1 flex items-center gap-1.5 h-8 text-xs px-3 hover:bg-accent hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                  className="flex-1 flex items-center gap-2 h-9 text-sm px-4 hover:bg-gray-50 hover:border-black/50 border-gray-300 transition-all"
                 >
                   <Link href={`/form/${form.id}/edit`}>
-                    <Edit className="h-3 w-3" />
+                    <Edit className="h-4 w-4" />
                     Edit
                   </Link>
                 </Button>
                 
                 {deletingFormId === form.id ? (
-                  <div className="flex items-center gap-1 bg-destructive/10 text-destructive px-2 py-1 rounded-md text-xs">
+                  <div className="flex items-center gap-2 bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm border border-red-200">
                     <span>Deleting in {countdownSeconds}s</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleUndoDelete}
-                      className="h-6 w-6 p-0 hover:bg-destructive/20"
+                      className="h-6 w-6 p-0 hover:bg-red-100 text-red-700"
                       title="Undo deletion"
                     >
                       <Undo2 className="h-3 w-3" />
@@ -480,10 +487,10 @@ export default function DashboardPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteClick(form.id)}
-                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 px-2 transition-colors"
+                    className="text-gray-500 hover:text-red-600 hover:bg-red-50 h-9 px-3 transition-colors"
                     title="Delete form"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
               </div>

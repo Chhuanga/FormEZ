@@ -445,22 +445,22 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header Section */}
-      <div className="bg-background border rounded-lg p-4 md:p-6">
+      <div className="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-sm">
         <div className="flex flex-col gap-6">
           {/* Title and Description */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold">{formTitle || 'Form Analytics'}</h1>
-              <p className="text-sm md:text-base text-muted-foreground">Insights and performance metrics</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-black">{formTitle || 'Form Analytics'}</h1>
+              <p className="text-sm md:text-base text-gray-600 mt-1">Insights and performance metrics</p>
             </div>
           </div>
 
           {/* Enhanced Time Range Filter */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">Time Range:</span>
-              <span className="text-sm font-semibold">{getTimeRangeLabel()}</span>
+              <Clock className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Time Range:</span>
+              <span className="text-sm font-semibold text-black">{getTimeRangeLabel()}</span>
             </div>
             
             {/* Quick Select Buttons */}
@@ -478,8 +478,8 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                     onClick={() => handleTimeRangeSelect(option.key)}
                     className={`text-xs transition-all duration-200 hover:scale-105 active:scale-95 ${
                       isSelected 
-                        ? 'shadow-md shadow-primary/20' 
-                        : 'hover:bg-muted/50 hover:shadow-sm'
+                        ? 'bg-black text-white hover:bg-gray-800 shadow-md' 
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
                     } ${isCustom ? 'border-dashed' : ''}`}
                   >
                     <Icon className="h-3 w-3 mr-1.5" />
@@ -491,9 +491,9 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
 
             {/* Custom Date Range Inputs (shown when custom is selected) */}
             {selectedTimeRange === 'custom' && (
-              <div className="flex flex-col sm:flex-row gap-3 p-4 bg-muted/30 rounded-lg border border-dashed">
+              <div className="flex flex-col sm:flex-row gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="from-date" className="text-sm font-medium whitespace-nowrap">From:</Label>
+                  <Label htmlFor="from-date" className="text-sm font-medium whitespace-nowrap text-black">From:</Label>
                   <Input
                     id="from-date"
                     type="date"
@@ -502,11 +502,11 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                       setDateRange(prev => ({ ...prev, from: e.target.value }));
                       setAnimationKey(prev => prev + 1);
                     }}
-                    className="text-sm"
+                    className="text-sm border-gray-300 focus:border-black"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="to-date" className="text-sm font-medium whitespace-nowrap">To:</Label>
+                  <Label htmlFor="to-date" className="text-sm font-medium whitespace-nowrap text-black">To:</Label>
                   <Input
                     id="to-date"
                     type="date"
@@ -515,7 +515,7 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                       setDateRange(prev => ({ ...prev, to: e.target.value }));
                       setAnimationKey(prev => prev + 1);
                     }}
-                    className="text-sm"
+                    className="text-sm border-gray-300 focus:border-black"
                   />
                 </div>
               </div>
@@ -523,15 +523,15 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
 
             {/* Active Filters */}
             {Object.keys(selectedFilters).length > 0 && (
-              <div className="flex flex-wrap gap-1 pt-2 border-t">
-                <Filter className="h-4 w-4 text-muted-foreground mt-1" />
-                <span className="text-xs text-muted-foreground mr-2">Active filters:</span>
+              <div className="flex flex-wrap gap-1 pt-2 border-t border-gray-200">
+                <Filter className="h-4 w-4 text-gray-500 mt-1" />
+                <span className="text-xs text-gray-600 mr-2">Active filters:</span>
                 {Object.entries(selectedFilters).map(([fieldId, values]) => 
                   values.map(value => (
                     <Badge 
                       key={`${fieldId}-${value}`} 
                       variant="secondary" 
-                      className="text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors"
+                      className="text-xs cursor-pointer bg-gray-200 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
                       onClick={() => {
                         setSelectedFilters(prev => {
                           const newFilters = { ...prev };
@@ -557,24 +557,24 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
       <TooltipProvider>
         <div 
           key={`cards-${animationKey}`}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
         >
           {/* Total Submissions */}
-          <Card className={`p-4 md:p-6 transition-all duration-300 hover:shadow-md hover:scale-[1.02] border-l-4 ${
-            submissionsTrend.direction === 'up' ? 'border-l-green-500' : 
-            submissionsTrend.direction === 'down' ? 'border-l-red-500' : 'border-l-gray-300'
+          <Card className={`p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-l-4 bg-white ${
+            submissionsTrend.direction === 'up' ? 'border-l-black' : 
+            submissionsTrend.direction === 'down' ? 'border-l-gray-400' : 'border-l-gray-300'
           }`}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg">
-                    <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Users className="h-5 w-5 text-black" />
                   </div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">Total Submissions</p>
+                  <p className="text-sm font-medium text-gray-600">Total Submissions</p>
                 </div>
                 <UITooltip>
                   <TooltipTrigger>
-                    <MiniSparkline data={data?.submissionTrend || []} className="text-primary" />
+                    <MiniSparkline data={data?.submissionTrend || []} className="text-black" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Last 7 days trend</p>
@@ -582,34 +582,40 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                 </UITooltip>
               </div>
               <div className="flex items-end justify-between">
-                <p className="text-lg md:text-2xl font-bold">{totalSubmissions}</p>
-                <div className={`flex items-center gap-1 text-xs ${getTrendColor(submissionsTrend.direction as 'up' | 'down' | 'neutral')}`}>
+                <p className="text-2xl font-bold text-black">{totalSubmissions}</p>
+                <div className={`flex items-center gap-1 text-xs ${
+                  submissionsTrend.direction === 'up' ? 'text-black' :
+                  submissionsTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+                }`}>
                   {React.createElement(getTrendIcon(submissionsTrend.direction as 'up' | 'down' | 'neutral'), { className: 'h-3 w-3' })}
-                  <span>{submissionsTrend.percent.toFixed(1)}%</span>
+                  <span className="font-medium">{submissionsTrend.percent.toFixed(1)}%</span>
                 </div>
               </div>
-              <p className={`text-xs ${getTrendColor(submissionsTrend.direction as 'up' | 'down' | 'neutral')}`}>
+              <p className={`text-xs ${
+                submissionsTrend.direction === 'up' ? 'text-black' :
+                submissionsTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 {submissionsTrend.text} from previous period
               </p>
             </div>
           </Card>
 
           {/* Total Views */}
-          <Card className={`p-4 md:p-6 transition-all duration-300 hover:shadow-md hover:scale-[1.02] border-l-4 ${
-            viewsTrend.direction === 'up' ? 'border-l-green-500' : 
-            viewsTrend.direction === 'down' ? 'border-l-red-500' : 'border-l-gray-300'
+          <Card className={`p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-l-4 bg-white ${
+            viewsTrend.direction === 'up' ? 'border-l-black' : 
+            viewsTrend.direction === 'down' ? 'border-l-gray-400' : 'border-l-gray-300'
           }`}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 md:p-2 bg-blue-500/10 rounded-lg">
-                    <Eye className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Eye className="h-5 w-5 text-black" />
                   </div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">Total Views</p>
+                  <p className="text-sm font-medium text-gray-600">Total Views</p>
                 </div>
                 <UITooltip>
                   <TooltipTrigger>
-                    <MiniSparkline data={data?.submissionTrend || []} className="text-blue-500" />
+                    <MiniSparkline data={data?.submissionTrend || []} className="text-black" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Estimated views trend</p>
@@ -617,36 +623,39 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                 </UITooltip>
               </div>
               <div className="flex items-end justify-between">
-                <p className="text-lg md:text-2xl font-bold">{data?.views || 0}</p>
-                <div className={`flex items-center gap-1 text-xs ${getTrendColor(viewsTrend.direction as 'up' | 'down' | 'neutral')}`}>
+                <p className="text-2xl font-bold text-black">{data?.views || 0}</p>
+                <div className={`flex items-center gap-1 text-xs ${
+                  viewsTrend.direction === 'up' ? 'text-black' :
+                  viewsTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+                }`}>
                   {React.createElement(getTrendIcon(viewsTrend.direction as 'up' | 'down' | 'neutral'), { className: 'h-3 w-3' })}
-                  <span>{viewsTrend.percent.toFixed(1)}%</span>
+                  <span className="font-medium">{viewsTrend.percent.toFixed(1)}%</span>
                 </div>
               </div>
-              <p className={`text-xs ${getTrendColor(viewsTrend.direction as 'up' | 'down' | 'neutral')}`}>
+              <p className={`text-xs ${
+                viewsTrend.direction === 'up' ? 'text-black' :
+                viewsTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 {viewsTrend.text} from previous period
               </p>
             </div>
           </Card>
 
           {/* Completion Rate */}
-          <Card className={`p-4 md:p-6 transition-all duration-300 hover:shadow-md hover:scale-[1.02] border-l-4 ${
-            completionRateTrend.direction === 'up' ? 'border-l-green-500' : 
-            completionRateTrend.direction === 'down' ? 'border-l-red-500' : 'border-l-gray-300'
+          <Card className={`p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-l-4 bg-white ${
+            completionRateTrend.direction === 'up' ? 'border-l-black' : 
+            completionRateTrend.direction === 'down' ? 'border-l-gray-400' : 'border-l-gray-300'
           }`}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`p-1.5 md:p-2 rounded-lg ${
-                    parseFloat(completionRate) >= 70 ? 'bg-green-500/10' :
-                    parseFloat(completionRate) >= 40 ? 'bg-yellow-500/10' : 'bg-red-500/10'
+                  <div className={`p-2 rounded-lg ${
+                    parseFloat(completionRate) >= 70 ? 'bg-gray-100' :
+                    parseFloat(completionRate) >= 40 ? 'bg-gray-100' : 'bg-gray-100'
                   }`}>
-                    <Target className={`h-4 w-4 md:h-5 md:w-5 ${
-                      parseFloat(completionRate) >= 70 ? 'text-green-500' :
-                      parseFloat(completionRate) >= 40 ? 'text-yellow-500' : 'text-red-500'
-                    }`} />
+                    <Target className="h-5 w-5 text-black" />
                   </div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">Completion Rate</p>
+                  <p className="text-sm font-medium text-gray-600">Completion Rate</p>
                 </div>
                 <UITooltip>
                   <TooltipTrigger>
@@ -668,34 +677,40 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                 </UITooltip>
               </div>
               <div className="flex items-end justify-between">
-                <p className="text-lg md:text-2xl font-bold">{completionRate}%</p>
-                <div className={`flex items-center gap-1 text-xs ${getTrendColor(completionRateTrend.direction as 'up' | 'down' | 'neutral')}`}>
+                <p className="text-2xl font-bold text-black">{completionRate}%</p>
+                <div className={`flex items-center gap-1 text-xs ${
+                  completionRateTrend.direction === 'up' ? 'text-black' :
+                  completionRateTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+                }`}>
                   {React.createElement(getTrendIcon(completionRateTrend.direction as 'up' | 'down' | 'neutral'), { className: 'h-3 w-3' })}
-                  <span>{completionRateTrend.percent.toFixed(1)}%</span>
+                  <span className="font-medium">{completionRateTrend.percent.toFixed(1)}%</span>
                 </div>
               </div>
-              <p className={`text-xs ${getTrendColor(completionRateTrend.direction as 'up' | 'down' | 'neutral')}`}>
+              <p className={`text-xs ${
+                completionRateTrend.direction === 'up' ? 'text-black' :
+                completionRateTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 {completionRateTrend.text} from previous period
               </p>
             </div>
           </Card>
 
           {/* Avg. per Day */}
-          <Card className={`p-4 md:p-6 transition-all duration-300 hover:shadow-md hover:scale-[1.02] border-l-4 ${
-            avgPerDayTrend.direction === 'up' ? 'border-l-green-500' : 
-            avgPerDayTrend.direction === 'down' ? 'border-l-red-500' : 'border-l-gray-300'
+          <Card className={`p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-l-4 bg-white ${
+            avgPerDayTrend.direction === 'up' ? 'border-l-black' : 
+            avgPerDayTrend.direction === 'down' ? 'border-l-gray-400' : 'border-l-gray-300'
           }`}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 md:p-2 bg-orange-500/10 rounded-lg">
-                    <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-black" />
                   </div>
-                  <p className="text-xs md:text-sm font-medium text-muted-foreground">Avg. per Day</p>
+                  <p className="text-sm font-medium text-gray-600">Avg. per Day</p>
                 </div>
                 <UITooltip>
                   <TooltipTrigger>
-                    <MiniSparkline data={data?.submissionTrend || []} className="text-orange-500" />
+                    <MiniSparkline data={data?.submissionTrend || []} className="text-black" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Daily average trend</p>
@@ -703,13 +718,19 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                 </UITooltip>
               </div>
               <div className="flex items-end justify-between">
-                <p className="text-lg md:text-2xl font-bold">{avgSubmissionsPerDay}</p>
-                <div className={`flex items-center gap-1 text-xs ${getTrendColor(avgPerDayTrend.direction as 'up' | 'down' | 'neutral')}`}>
+                <p className="text-2xl font-bold text-black">{avgSubmissionsPerDay}</p>
+                <div className={`flex items-center gap-1 text-xs ${
+                  avgPerDayTrend.direction === 'up' ? 'text-black' :
+                  avgPerDayTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+                }`}>
                   {React.createElement(getTrendIcon(avgPerDayTrend.direction as 'up' | 'down' | 'neutral'), { className: 'h-3 w-3' })}
-                  <span>{avgPerDayTrend.percent.toFixed(1)}%</span>
+                  <span className="font-medium">{avgPerDayTrend.percent.toFixed(1)}%</span>
                 </div>
               </div>
-              <p className={`text-xs ${getTrendColor(avgPerDayTrend.direction as 'up' | 'down' | 'neutral')}`}>
+              <p className={`text-xs ${
+                avgPerDayTrend.direction === 'up' ? 'text-black' :
+                avgPerDayTrend.direction === 'down' ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 {avgPerDayTrend.text} from previous period
               </p>
             </div>
