@@ -44,6 +44,18 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], FieldValidationDto.prototype, "maxLength", void 0);
+class OptionDto {
+    label;
+    value;
+}
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], OptionDto.prototype, "label", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], OptionDto.prototype, "value", void 0);
 class FormFieldDto {
     id;
     type;
@@ -80,7 +92,8 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => OptionDto),
     __metadata("design:type", Array)
 ], FormFieldDto.prototype, "options", void 0);
 //# sourceMappingURL=form-field.dto.js.map

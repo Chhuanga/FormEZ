@@ -26,7 +26,7 @@ export default function EditFormPage() {
     const fetchForm = async () => {
       try {
         const token = await user.getIdToken();
-        const response = await fetch(`http://localhost:3001/forms/${id}`, {
+        const response = await fetch(`/api/forms/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

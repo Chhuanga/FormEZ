@@ -11,35 +11,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FirebaseGuard = void 0;
 const common_1 = require("@nestjs/common");
-const admin = require("firebase-admin");
-const path = require("path");
+const app_1 = require("firebase-admin/app");
+const auth_1 = require("firebase-admin/auth");
 let FirebaseGuard = class FirebaseGuard {
-    defaultApp;
+    app;
     constructor() {
-        const serviceAccountPath = path.join(process.cwd(), 'firebase-service-account.json');
-        if (!admin.apps.length) {
-            this.defaultApp = admin.initializeApp({
-                credential: admin.credential.cert(serviceAccountPath),
+        if (!global.firebaseApp) {
+            global.firebaseApp = (0, app_1.initializeApp)({
+                credential: (0, app_1.cert)({
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                }),
             });
         }
-        else {
-            this.defaultApp = admin.app();
-        }
+        this.app = global.firebaseApp;
     }
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
-        const authHeader = request.headers['authorization'];
-        const token = authHeader?.split('Bearer ')[1];
+        const authorization = request.headers.authorization;
+        if (!authorization || !authorization.startsWith('Bearer ')) {
+            return false;
+        }
+        const token = authorization.split('Bearer ')[1];
         if (!token) {
             return false;
         }
         try {
-            const decodedToken = await this.defaultApp.auth().verifyIdToken(token);
+            const decodedToken = await (0, auth_1.getAuth)(this.app).verifyIdToken(token);
             request.user = decodedToken;
             return true;
         }
-        catch (error) {
-            console.error('Error verifying Firebase token:', error);
+        catch (err) {
+            console.error('Firebase authentication error:', err);
             return false;
         }
     }

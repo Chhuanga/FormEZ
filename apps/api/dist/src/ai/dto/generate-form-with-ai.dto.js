@@ -11,8 +11,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GenerateFormWithAiDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class AnswerDto {
+    question;
+    answer;
+}
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], AnswerDto.prototype, "question", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], AnswerDto.prototype, "answer", void 0);
 class GenerateFormWithAiDto {
     prompt;
+    answers;
 }
 exports.GenerateFormWithAiDto = GenerateFormWithAiDto;
 __decorate([
@@ -20,4 +36,11 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], GenerateFormWithAiDto.prototype, "prompt", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => AnswerDto),
+    __metadata("design:type", Array)
+], GenerateFormWithAiDto.prototype, "answers", void 0);
 //# sourceMappingURL=generate-form-with-ai.dto.js.map

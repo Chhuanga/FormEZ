@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Zap } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/AuthContext';
-import { useFormStore } from '@/store/form';
 
-export function IntegrationsSettings() {
+interface IntegrationsSettingsProps {
+  formId: string;
+}
+
+export function IntegrationsSettings({ formId }: IntegrationsSettingsProps) {
   const { getToken } = useAuth();
-  const { formId } = useFormStore();
 
   const handleConnect = async () => {
     try {
@@ -21,7 +23,7 @@ export function IntegrationsSettings() {
       }
 
       const res = await fetch(
-        `http://localhost:3001/integrations/google/url?formId=${formId}`,
+        `/api/integrations/google/url?formId=${formId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -42,24 +44,23 @@ export function IntegrationsSettings() {
   };
 
   return (
-    <div className="space-y-4 p-4 sm:p-6">
-      <div className="space-y-2">
+    <div className="space-y-4">
+      <div>
         <Label className="text-lg font-semibold flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
           Integrations
         </Label>
-        <p className="text-sm text-muted-foreground">
-          Connect your form to other services to send submission data
-          automatically.
+        <p className="text-sm text-muted-foreground mt-1">
+          Connect your form to send submission data automatically.
         </p>
       </div>
       
       <div className="p-4 border rounded-lg">
         <h3 className="font-semibold mb-2">Google Sheets</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Send submission data directly to a Google Sheet.
+        <p className="text-sm text-muted-foreground mb-3">
+          Send submissions directly to a Google Sheet.
         </p>
-        <Button onClick={handleConnect}>Connect to Google Sheets</Button>
+        <Button onClick={handleConnect}>Connect Google Sheets</Button>
       </div>
     </div>
   );

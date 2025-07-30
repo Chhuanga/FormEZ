@@ -17,9 +17,9 @@ export declare class SubmissionsController {
                 answerId: string;
             } | null;
         } & {
-            fieldId: string;
             value: import("@prisma/client/runtime/library").JsonValue;
             id: string;
+            fieldId: string;
             createdAt: Date;
             updatedAt: Date;
             submissionId: string;
@@ -52,9 +52,9 @@ export declare class SubmissionsController {
                     path: string;
                     answerId: string;
                 } | null;
-                fieldId: string;
                 value: import("@prisma/client/runtime/library").JsonValue;
                 id: string;
+                fieldId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 submissionId: string;
@@ -121,7 +121,7 @@ export declare class SubmissionsController {
         form: {
             title: string;
             fields: import("@prisma/client/runtime/library").JsonValue;
-            userId: string;
+            userId: string | null;
         };
         answers: ({
             file: {
@@ -135,9 +135,9 @@ export declare class SubmissionsController {
                 answerId: string;
             } | null;
         } & {
-            fieldId: string;
             value: import("@prisma/client/runtime/library").JsonValue;
             id: string;
+            fieldId: string;
             createdAt: Date;
             updatedAt: Date;
             submissionId: string;

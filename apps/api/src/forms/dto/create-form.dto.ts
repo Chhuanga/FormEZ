@@ -59,12 +59,17 @@ export class CreateFormDto {
 
   @IsObject()
   @IsOptional()
+  formSettings?: any;
+
+  @IsObject()
+  @IsOptional()
   postSubmissionSettings?: any;
 
   static readonly schema = Joi.object({
     title: Joi.string().required(),
     fields: Joi.array().items(fieldSchema).optional(),
     theme: Joi.object().optional(),
+    formSettings: Joi.object().optional(),
     postSubmissionSettings: Joi.object().optional(),
   });
 }

@@ -71,7 +71,15 @@ export function CreateWithAiCard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate form');
+        let errorMessage = 'Failed to generate form';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          // If response can't be parsed as JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -84,6 +92,8 @@ export function CreateWithAiCard() {
       }
     } catch (error) {
       console.error('Error generating form with AI:', error);
+      // You could add a toast notification or state to show the error to the user
+      alert(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }

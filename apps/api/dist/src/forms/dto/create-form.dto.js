@@ -31,18 +31,25 @@ const fieldSchema = Joi.object({
         minLength: Joi.number().optional(),
         maxLength: Joi.number().optional(),
     }).optional(),
-    options: Joi.array().items(Joi.string()).optional(),
+    options: Joi.array()
+        .items(Joi.alternatives().try(Joi.string(), Joi.object({
+        label: Joi.string().required(),
+        value: Joi.string().required(),
+    })))
+        .optional(),
     conditionalLogic: conditionalLogicSchema.optional().allow(null),
 });
 class CreateFormDto {
     title;
     fields;
     theme;
+    formSettings;
     postSubmissionSettings;
     static schema = Joi.object({
         title: Joi.string().required(),
         fields: Joi.array().items(fieldSchema).optional(),
         theme: Joi.object().optional(),
+        formSettings: Joi.object().optional(),
         postSubmissionSettings: Joi.object().optional(),
     });
 }
@@ -64,6 +71,11 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], CreateFormDto.prototype, "theme", void 0);
+__decorate([
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateFormDto.prototype, "formSettings", void 0);
 __decorate([
     (0, class_validator_1.IsObject)(),
     (0, class_validator_1.IsOptional)(),

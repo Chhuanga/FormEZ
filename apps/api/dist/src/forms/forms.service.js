@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FormsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const integrations_service_1 = require("../integrations/integrations.service");
 let FormsService = class FormsService {
     prisma;
-    constructor(prisma) {
+    integrationsService;
+    constructor(prisma, integrationsService) {
         this.prisma = prisma;
+        this.integrationsService = integrationsService;
     }
     async create(createFormDto, userId) {
         await this.prisma.user.upsert({
@@ -122,10 +125,35 @@ let FormsService = class FormsService {
         });
         return { message: 'Form deleted successfully' };
     }
+    async findSubmissions(formId, userId) {
+        const form = await this.prisma.form.findUnique({
+            where: { id: formId, userId: userId },
+            include: {
+                submissions: {
+                    include: {
+                        answers: {
+                            include: {
+                                file: true,
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                },
+            },
+        });
+        if (!form) {
+            throw new common_1.NotFoundException('Form not found or you do not have permission to view its submissions.');
+        }
+        return form;
+    }
+    getIntegrations(formId, userId) {
+        return this.integrationsService.findAllByFormId(formId, userId);
+    }
 };
 exports.FormsService = FormsService;
 exports.FormsService = FormsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        integrations_service_1.IntegrationsService])
 ], FormsService);
 //# sourceMappingURL=forms.service.js.map

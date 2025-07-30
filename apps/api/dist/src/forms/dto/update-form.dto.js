@@ -21,7 +21,12 @@ const fieldSchema = Joi.object({
         minLength: Joi.number().optional(),
         maxLength: Joi.number().optional(),
     }).optional(),
-    options: Joi.array().items(Joi.string()).optional(),
+    options: Joi.array()
+        .items(Joi.alternatives().try(Joi.string(), Joi.object({
+        label: Joi.string().required(),
+        value: Joi.string().required(),
+    })))
+        .optional(),
     conditionalLogic: conditionalLogicSchema.optional().allow(null),
 });
 class UpdateFormDto extends (0, mapped_types_1.PartialType)(create_form_dto_1.CreateFormDto) {
@@ -29,6 +34,7 @@ class UpdateFormDto extends (0, mapped_types_1.PartialType)(create_form_dto_1.Cr
         title: Joi.string().optional(),
         fields: Joi.array().items(fieldSchema).optional(),
         theme: Joi.object().optional(),
+        formSettings: Joi.object().optional(),
         postSubmissionSettings: Joi.object({
             type: Joi.string().valid('message', 'redirect').required(),
             message: Joi.string().when('type', {
@@ -43,6 +49,7 @@ class UpdateFormDto extends (0, mapped_types_1.PartialType)(create_form_dto_1.Cr
             }),
         }).optional(),
     });
+    formSettings;
     postSubmissionSettings;
 }
 exports.UpdateFormDto = UpdateFormDto;

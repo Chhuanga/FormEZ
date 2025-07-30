@@ -24,7 +24,7 @@ let AiController = class AiController {
         this.aiService = aiService;
     }
     async generateForm(body, user) {
-        return this.aiService.generateFormFromPrompt(body.prompt, user);
+        return this.aiService.generateFormOrRefinementQuestions(body, user);
     }
 };
 exports.AiController = AiController;

@@ -4,6 +4,7 @@ export declare class CreateFormDto {
     title: string;
     fields: FormFieldDto[];
     theme?: any;
+    formSettings?: any;
     postSubmissionSettings?: any;
     static readonly schema: Joi.ObjectSchema<any>;
 }

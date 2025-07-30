@@ -39,8 +39,6 @@ export default function DashboardPage() {
   const [countdownSeconds, setCountdownSeconds] = useState<number>(5);
   const [countdownIntervalId, setCountdownIntervalId] = useState<NodeJS.Timeout | null>(null);
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
   const fetchForms = async () => {
     if (!user) {
       setLoading(false);
@@ -48,7 +46,7 @@ export default function DashboardPage() {
     }
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`${apiBaseUrl}/forms`, {
+      const response = await fetch('/api/forms', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -62,10 +60,10 @@ export default function DashboardPage() {
           try {
             // Fetch submissions and analytics in parallel
             const [submissionsResponse, analyticsResponse] = await Promise.all([
-              fetch(`${apiBaseUrl}/forms/${form.id}/submissions`, {
+              fetch(`/api/forms/${form.id}/submissions`, {
                 headers: { Authorization: `Bearer ${token}` },
               }),
-              fetch(`${apiBaseUrl}/forms/${form.id}/submissions/analytics`, {
+              fetch(`/api/forms/${form.id}/submissions/analytics`, {
                 headers: { Authorization: `Bearer ${token}` },
               })
             ]);
@@ -191,7 +189,7 @@ export default function DashboardPage() {
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`${apiBaseUrl}/forms/${formId}`, {
+      const response = await fetch(`/api/forms/${formId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

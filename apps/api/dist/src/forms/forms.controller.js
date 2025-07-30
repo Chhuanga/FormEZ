@@ -46,6 +46,12 @@ let FormsController = class FormsController {
     remove(id, user) {
         return this.formsService.remove(id, user.uid);
     }
+    findSubmissions(id, user) {
+        return this.formsService.findSubmissions(id, user.uid);
+    }
+    getIntegrations(id, user) {
+        return this.formsService.getIntegrations(id, user.uid);
+    }
 };
 exports.FormsController = FormsController;
 __decorate([
@@ -108,6 +114,24 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], FormsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)(':id/submissions'),
+    (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, auth_decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], FormsController.prototype, "findSubmissions", null);
+__decorate([
+    (0, common_1.Get)(':id/integrations'),
+    (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, auth_decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], FormsController.prototype, "getIntegrations", null);
 exports.FormsController = FormsController = __decorate([
     (0, common_1.Controller)('forms'),
     __metadata("design:paramtypes", [forms_service_1.FormsService])

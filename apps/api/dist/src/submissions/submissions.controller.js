@@ -41,7 +41,7 @@ let SubmissionsController = class SubmissionsController {
 };
 exports.SubmissionsController = SubmissionsController;
 __decorate([
-    (0, common_1.Post)(':formId'),
+    (0, common_1.Post)(),
     __param(0, (0, common_1.Param)('formId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -49,7 +49,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SubmissionsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('form/:formId'),
+    (0, common_1.Get)(),
     (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),
     __param(0, (0, common_1.Param)('formId')),
     __param(1, (0, common_1.Request)()),
@@ -58,7 +58,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SubmissionsController.prototype, "findByFormId", null);
 __decorate([
-    (0, common_1.Get)('analytics/:formId'),
+    (0, common_1.Get)('analytics'),
     (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),
     __param(0, (0, common_1.Param)('formId')),
     __param(1, (0, auth_decorators_1.CurrentUser)()),
@@ -78,7 +78,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SubmissionsController.prototype, "findOne", null);
 exports.SubmissionsController = SubmissionsController = __decorate([
-    (0, common_1.Controller)('submissions'),
+    (0, common_1.Controller)('forms/:formId/submissions'),
     __metadata("design:paramtypes", [submissions_service_1.SubmissionsService])
 ], SubmissionsController);
 //# sourceMappingURL=submissions.controller.js.map

@@ -28,6 +28,7 @@ model Form {
   title     String
   fields    Json
   theme     Json        @default("{}")
+  formSettings Json     @default("{}")
   postSubmissionSettings Json @default("{\"type\":\"message\",\"message\":\"Thanks for your submission!\"}")
 
   userId String?

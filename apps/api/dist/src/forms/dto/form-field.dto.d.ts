@@ -5,12 +5,16 @@ declare class FieldValidationDto {
     minLength?: number;
     maxLength?: number;
 }
+declare class OptionDto {
+    label: string;
+    value: string;
+}
 export declare class FormFieldDto {
     id: string;
     type: string;
     label: string;
     placeholder?: string;
     validation?: FieldValidationDto;
-    options?: string[];
+    options?: (string | OptionDto)[];
 }
 export {};

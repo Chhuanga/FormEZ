@@ -22,7 +22,7 @@ export default function NewFormPage() {
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch('http://localhost:3001/forms', {
+      const response = await fetch('/api/forms', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

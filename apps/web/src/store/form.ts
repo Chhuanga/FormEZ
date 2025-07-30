@@ -53,6 +53,11 @@ export interface Theme {
   textColor: string;
 }
 
+export interface FormSettings {
+  titleIcon?: string; // Lucide icon name or emoji
+  coverImage?: string; // URL to cover image
+}
+
 const defaultTheme: Theme = {
   backgroundColor: '#F3F4F6',
   formBackgroundColor: '#FFFFFF',
@@ -70,9 +75,11 @@ const defaultTheme: Theme = {
 export type FormState = {
   fields: FormField[];
   theme: Theme;
+  formSettings: FormSettings;
   selectedFieldId: string | null;
   setTheme: (theme: Partial<Theme>) => void;
   resetTheme: () => void;
+  setFormSettings: (settings: Partial<FormSettings>) => void;
   addField: (field: FormField) => void;
   insertField: (field: FormField, index: number) => void;
   moveField: (oldIndex: number, newIndex: number) => void;
@@ -91,6 +98,7 @@ const initialFormState = {
   fields: [],
   selectedField: null,
   theme: {},
+  formSettings: {},
   postSubmissionSettings: {
     type: 'message',
     message: 'Thanks for your submission!',
@@ -101,10 +109,13 @@ export const useFormStore = create<FormState>()(
   devtools((set) => ({
     fields: [],
     theme: defaultTheme,
+    formSettings: {},
     selectedFieldId: null,
     setTheme: (newTheme) =>
       set((state) => ({ theme: { ...state.theme, ...newTheme } })),
     resetTheme: () => set({ theme: defaultTheme }),
+    setFormSettings: (newSettings) =>
+      set((state) => ({ formSettings: { ...state.formSettings, ...newSettings } })),
     addField: (field) =>
       set((state) => ({
         fields: [...state.fields, field],

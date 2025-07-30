@@ -39,6 +39,7 @@ export class UpdateFormDto extends PartialType(CreateFormDto) {
     title: Joi.string().optional(),
     fields: Joi.array().items(fieldSchema).optional(),
     theme: Joi.object().optional(),
+    formSettings: Joi.object().optional(),
     postSubmissionSettings: Joi.object({
       type: Joi.string().valid('message', 'redirect').required(),
       message: Joi.string().when('type', {
@@ -54,5 +55,6 @@ export class UpdateFormDto extends PartialType(CreateFormDto) {
     }).optional(),
   });
 
+  formSettings?: any;
   postSubmissionSettings?: any;
 }

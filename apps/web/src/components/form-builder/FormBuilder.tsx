@@ -63,6 +63,7 @@ interface FormBuilderProps {
     title: string;
     fields: FormField[];
     theme?: any;
+    formSettings?: any;
     postSubmissionSettings?: any;
   }
 }
@@ -76,6 +77,8 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     theme,
     setTheme,
     resetTheme,
+    formSettings,
+    setFormSettings,
     postSubmissionSettings,
     setPostSubmissionSettings,
   } = useFormStore();
@@ -109,6 +112,9 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       if (initialData.theme) {
         setTheme(initialData.theme);
       }
+      if (initialData.formSettings) {
+        setFormSettings(initialData.formSettings);
+      }
       if (initialData.postSubmissionSettings) {
         setPostSubmissionSettings(initialData.postSubmissionSettings);
       }
@@ -118,7 +124,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       setFields([]);
       setFormTitle('Untitled Form');
     }
-  }, [initialData, setFields, setTheme, setPostSubmissionSettings]);
+  }, [initialData, setFields, setTheme, setFormSettings, setPostSubmissionSettings]);
 
   const handleSave = async () => {
     if (!user || !initialData) { // Also check for initialData
@@ -134,6 +140,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       title: formTitle,
       fields: fields,
       theme: theme,
+      formSettings: formSettings,
       postSubmissionSettings: postSubmissionSettings,
     };
 
@@ -452,7 +459,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           {/* Main content */}
           <main className="flex-1 flex min-h-0 overflow-hidden">
             <div className="flex-1 relative min-w-0 overflow-y-auto">
-              <Canvas id="form-canvas" viewMode={viewMode} />
+              <Canvas id="form-canvas" viewMode={viewMode} formTitle={formTitle} />
             </div>
             
             {/* Settings Sidebar - Responsive and sticky */}

@@ -12,13 +12,20 @@ function delay(ms: number) {
 
 @Injectable()
 export class AiService {
-  private genAI: GoogleGenerativeAI;
+  private genAI: GoogleGenerativeAI | null = null;
+  private isApiKeyValid: boolean = false;
 
   constructor(private readonly formsService: FormsService) {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY is not set');
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'placeholder') {
+      console.warn(
+        'GEMINI_API_KEY is not set or is placeholder - AI features will be disabled',
+      );
+      this.isApiKeyValid = false;
+    } else {
+      this.genAI = new GoogleGenerativeAI(apiKey);
+      this.isApiKeyValid = true;
     }
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 
   private async callGemini(
@@ -26,9 +33,15 @@ export class AiService {
     retries = 3,
     delayDuration = 1000,
   ): Promise<string> {
+    if (!this.isApiKeyValid || !this.genAI) {
+      throw new Error(
+        'AI service is not available - invalid or missing API key',
+      );
+    }
+
     try {
       const model = this.genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash-latest',
+        model: 'gemini-2.0-flash',
       });
       const result = await model.generateContent(prompt);
       const response = result.response;
@@ -153,29 +166,48 @@ export class AiService {
     dto: GenerateFormWithAiDto,
     user: DecodedIdToken,
   ) {
-    if (dto.answers && dto.answers.length > 0) {
-      return this.generateForm(dto, user);
+    if (!this.isApiKeyValid) {
+      throw new InternalServerErrorException(
+        'AI features are currently unavailable. Please check the server configuration.',
+      );
     }
 
-    const refinementPrompt = this.getRefinementPrompt(dto.prompt);
-    const rawResponse = await this.callGemini(refinementPrompt);
-
     try {
-      const questions = JSON.parse(rawResponse) as RefinementQuestion[];
-      if (Array.isArray(questions) && questions.length === 0) {
-        // AI deemed the prompt specific enough, proceed to form generation
+      if (dto.answers && dto.answers.length > 0) {
         return this.generateForm(dto, user);
       }
-      return { questions };
-    } catch (parseError) {
-      console.error(
-        'Failed to parse refinement response as JSON:',
-        rawResponse,
-        parseError,
-      );
-      throw new InternalServerErrorException(
-        'AI failed to process the request. Please try again.',
-      );
+
+      const refinementPrompt = this.getRefinementPrompt(dto.prompt);
+      const rawResponse = await this.callGemini(refinementPrompt);
+
+      try {
+        const questions = JSON.parse(rawResponse) as RefinementQuestion[];
+        if (Array.isArray(questions) && questions.length === 0) {
+          // AI deemed the prompt specific enough, proceed to form generation
+          return this.generateForm(dto, user);
+        }
+        return { questions };
+      } catch (parseError) {
+        console.error(
+          'Failed to parse refinement response as JSON:',
+          rawResponse,
+          parseError,
+        );
+        throw new InternalServerErrorException(
+          'AI failed to process the request. Please try again.',
+        );
+      }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message?.includes('AI service is not available')
+      ) {
+        throw new InternalServerErrorException(
+          'AI features are temporarily unavailable. Please try again later.',
+        );
+      }
+      // Re-throw other errors as-is
+      throw error;
     }
   }
 }

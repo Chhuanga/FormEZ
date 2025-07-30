@@ -3,8 +3,9 @@
 import { useState } from 'react';
 // import { ThemeSettings } from './ThemeSettings';
 import { SettingsTabs } from './SettingsTabs';
+import { FormHeaderSettings } from './FormHeaderSettings';
 import { useFormStore } from '@/store/form';
-import { Eye, Brush, Settings, Send } from 'lucide-react';
+import { Eye, Brush, Settings, Send, Image } from 'lucide-react';
 import { PostSubmissionSettings } from './PostSubmissionSettings';
 
 function NoFieldSelected() {
@@ -24,12 +25,12 @@ function NoFieldSelected() {
 
 export function SettingsSidebar() {
   const { fields, selectedFieldId, setSelectedFieldId } = useFormStore();
-  const [view, setView] = useState<'field' | 'theme' | 'post-submission'>('field');
+  const [view, setView] = useState<'field' | 'header' | 'theme' | 'post-submission'>('field');
 
   const selectedField = fields.find((f) => f.id === selectedFieldId);
 
   // If a field is selected, always show field settings
-  // If not, show the last active view (theme or post-submission)
+  // If not, show the last active view (header, theme or post-submission)
   const currentView = selectedFieldId ? 'field' : view;
 
   return (
@@ -43,6 +44,7 @@ export function SettingsSidebar() {
           {currentView === 'field' && !selectedFieldId && (
              <NoFieldSelected />
           )}
+          {currentView === 'header' && <FormHeaderSettings />}
           {/* {currentView === 'theme' && <ThemeSettings />} */}
           {currentView === 'post-submission' && <PostSubmissionSettings />}
         </div>
@@ -62,6 +64,19 @@ export function SettingsSidebar() {
           <Settings className="h-4 w-4 mb-1" />
           <span className="text-xs font-medium">Field</span>
         </button>
+        
+        <button
+          onClick={() => {
+            setView('header');
+            setSelectedFieldId(null);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center py-2 rounded-md transition-colors ${currentView === 'header' ? 'text-primary bg-muted' : 'text-muted-foreground hover:bg-muted/50'}`}
+          title="Form Header"
+        >
+          <Image className="h-4 w-4 mb-1" />
+          <span className="text-xs font-medium">Header</span>
+        </button>
+        
         {/* <button
           onClick={() => {
             setView('theme');
@@ -73,6 +88,7 @@ export function SettingsSidebar() {
           <Brush className="h-5 w-5 mb-1" />
            <span className="text-xs font-medium">Theme</span>
         </button> */}
+        
         <button
           onClick={() => {
             setView('post-submission');
