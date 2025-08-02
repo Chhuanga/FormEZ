@@ -9,7 +9,7 @@ export class AccountsController {
   constructor(private readonly integrationsService: IntegrationsService) {}
 
   @Get()
-  async getAccounts(@Req() req: AuthenticatedRequest) {
+  getAccounts(@Req() req: AuthenticatedRequest) {
     const userId = req.user.uid;
     return this.integrationsService.getAccounts(userId);
   }

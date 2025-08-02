@@ -81,6 +81,7 @@ async function main() {
     update: {},
     create: {
       id: testUserId,
+      email: `${testUserId}@test.firebase`,
     },
   });
 

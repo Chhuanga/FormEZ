@@ -13,11 +13,15 @@ export class FormsService {
   ) {}
 
   async create(createFormDto: CreateFormDto, userId: string) {
-    // Ensure a user record exists before creating a form linked to it.
+    // For Firebase users, we need to provide at least an email
+    // This is a temporary fix - in a real app, you'd get user details from Firebase token
     await this.prisma.user.upsert({
       where: { id: userId },
       update: {},
-      create: { id: userId },
+      create: {
+        id: userId,
+        email: `${userId}@firebase.temp`, // Temporary email for Firebase users
+      },
     });
 
     return this.prisma.form.create({

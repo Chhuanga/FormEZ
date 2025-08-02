@@ -15,6 +15,10 @@ datasource db {
 
 model User {
   id        String   @id // Firebase UID
+  email     String   @unique
+  name      String?
+  image     String?
+  googleId  String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   forms     Form[]
