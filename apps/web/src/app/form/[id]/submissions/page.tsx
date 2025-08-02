@@ -99,8 +99,8 @@ interface Account {
 
 export default function SubmissionsPage() {
   const { user } = useAuth();
-  const params = useParams();
-  const searchParams = useSearchParams();
+  const params = useParams() || {};
+  const searchParams = useSearchParams() || new URLSearchParams();
   const id = params.id as string;
   const from = searchParams.get('from');
 

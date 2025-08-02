@@ -45,7 +45,7 @@ const navigationItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
