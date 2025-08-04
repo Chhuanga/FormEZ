@@ -7,5 +7,6 @@ import { FormsModule } from '../forms/forms.module';
   imports: [FormsModule],
   controllers: [AiController],
   providers: [AiService],
+  exports: [AiService],
 })
 export class AiModule {}

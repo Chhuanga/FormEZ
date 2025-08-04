@@ -104,6 +104,11 @@ async function main() {
         borderColor: '#E2E8F0',
         buttonTextColor: '#FFFFFF',
       },
+      formSettings: {
+        titleIcon: 'Star',
+        coverImage:
+          'https://images.unsplash.com/photo-1556745757-8d76bac6ab00?auto=format&fit=crop&w=1200&q=80',
+      },
       postSubmissionSettings: {
         type: 'message',
         message: 'Thank you for your valuable feedback!',

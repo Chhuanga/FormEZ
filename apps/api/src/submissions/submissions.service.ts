@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IntegrationsService } from '../integrations/integrations.service';
+import { AiService } from '../ai/ai.service';
 import { AnswerDto, CreateSubmissionDto } from './dto/create-submission.dto';
 import { Answer, Form, FormSubmission, FormView } from '@prisma/client';
 
@@ -15,7 +16,7 @@ interface FormField {
   validation?: {
     required?: boolean;
   };
-  options?: string[];
+  options?: (string | { value: string; label: string })[];
 }
 
 type FormWithAnalytics = Form & {
@@ -100,6 +101,7 @@ export class SubmissionsService {
   constructor(
     private prisma: PrismaService,
     private integrationsService: IntegrationsService,
+    private aiService: AiService,
   ) {}
 
   async create(formId: string, createSubmissionDto: CreateSubmissionDto) {
@@ -253,7 +255,12 @@ export class SubmissionsService {
     formFields.forEach((field) => {
       if (['RadioGroup', 'Select', 'Checkbox'].includes(field.type)) {
         const counts = new Map<string, number>();
-        field.options?.forEach((option) => counts.set(option, 0));
+        field.options?.forEach((option) => {
+          // Handle both string options and object options with value/label
+          const optionValue =
+            typeof option === 'string' ? option : option.value;
+          counts.set(optionValue, 0);
+        });
         choiceFieldAnalytics.set(field.id, counts);
       } else if (['Input', 'Textarea', 'Email'].includes(field.type)) {
         textFieldAnalytics.set(field.id, new Map<string, number>());
@@ -358,6 +365,42 @@ export class SubmissionsService {
         views: totalViews,
         submissions: totalSubmissions,
       },
+    };
+  }
+
+  async getAiAnalyticsSummary(
+    formId: string,
+    userId: string,
+    dateRange?: { from: string; to: string },
+  ) {
+    // Get the form data and analytics data
+    const form = await this.prisma.form.findUnique({
+      where: { id: formId, userId },
+    });
+
+    if (!form) {
+      throw new NotFoundException(
+        'Form not found or you do not have permission to view its analytics',
+      );
+    }
+
+    const analyticsData = await this.getAnalyticsByFormId(
+      formId,
+      userId,
+      dateRange,
+    );
+
+    // Generate AI summary using the AI service
+    const aiSummary = await this.aiService.generateAnalyticsSummary(
+      form,
+      analyticsData,
+    );
+
+    return {
+      summary: aiSummary,
+      generatedAt: new Date().toISOString(),
+      formId,
+      dateRange,
     };
   }
 

@@ -136,9 +136,26 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     const endpoint = `/api/forms/${initialData.id}`;
     const method = 'PATCH';
 
+    // Clean up fields to ensure proper structure
+    const cleanedFields = fields.map(field => {
+      const cleanField = { ...field };
+      
+      // If there's a direct 'required' property, move it to validation
+      if ((cleanField as any).required !== undefined) {
+        const required = (cleanField as any).required;
+        delete (cleanField as any).required;
+        cleanField.validation = { 
+          ...cleanField.validation, 
+          required: required 
+        };
+      }
+      
+      return cleanField;
+    });
+
     const body = {
       title: formTitle,
-      fields: fields,
+      fields: cleanedFields,
       theme: theme,
       formSettings: formSettings,
       postSubmissionSettings: postSubmissionSettings,
@@ -156,34 +173,21 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       });
 
       if (!response.ok) {
-        let errorData;
-        const responseClone = response.clone(); // Clone the response
-        try {
-          // Try to parse the error response as JSON from the original response
-          errorData = await response.json();
-          console.error('Error response from server (JSON):', errorData);
-          const message = errorData.message || 'Failed to save form';
-          throw new Error(message);
-        } catch (e) {
-          // If parsing as JSON fails, read as text from the clone
-          errorData = await responseClone.text();
-          console.error('Error response from server (text):', errorData);
-          throw new Error('Failed to save form');
-        }
+        throw new Error('Failed to save form');
       }
 
       const savedForm = await response.json();
-      console.log('Form saved successfully:', savedForm);
       
+      // Visual feedback that form was saved
       const originalTitle = document.title;
-      document.title = '✓ Saved - FormEz';
+      document.title = '✓ Saved';
       setTimeout(() => {
         document.title = originalTitle;
       }, 2000);
       
     } catch (error) {
       console.error('Error saving form:', error);
-      alert('Error saving form. See console for details.');
+      alert('Failed to save form. Please try again.');
     } finally {
       setSaving(false);
     }

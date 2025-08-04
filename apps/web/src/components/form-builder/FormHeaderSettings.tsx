@@ -20,8 +20,9 @@ import {
   Crown, 
   Gift,
   X,
-  Upload,
-  ExternalLink
+  Search,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 
 const iconOptions = [
@@ -39,7 +40,52 @@ const iconOptions = [
 export function FormHeaderSettings() {
   const { formSettings, setFormSettings } = useFormStore();
   const [coverImageUrl, setCoverImageUrl] = useState(formSettings.coverImage || '');
-  const [isValidImage, setIsValidImage] = useState(false);
+  const [isValidImage, setIsValidImage] = useState(Boolean(formSettings.coverImage));
+  const [urlValidationError, setUrlValidationError] = useState<string | null>(null);
+
+  // Validation function for image URLs (similar to Canvas component)
+  const validateImageUrl = (url: string): { isValid: boolean; errorMessage?: string } => {
+    if (!url || typeof url !== 'string') {
+      return { isValid: false, errorMessage: 'Please enter a valid URL' };
+    }
+
+    // Basic URL format validation
+    try {
+      new URL(url);
+    } catch {
+      return { isValid: false, errorMessage: 'Invalid URL format' };
+    }
+
+    // Validate Unsplash URLs specifically
+    if (url.includes('images.unsplash.com')) {
+      const unsplashMatch = url.match(/images\.unsplash\.com\/photo-([a-zA-Z0-9_-]{10,})/);
+      if (!unsplashMatch || unsplashMatch[1].length < 10) {
+        return { 
+          isValid: false, 
+          errorMessage: 'Invalid Unsplash photo ID. Please use a complete photo URL.' 
+        };
+      }
+    } else if (url.includes('unsplash.com/photos/')) {
+      const match = url.match(/unsplash\.com\/photos\/[^\/]*-([a-zA-Z0-9_-]+)$/);
+      if (!match || !match[1] || match[1].length < 10) {
+        return { 
+          isValid: false, 
+          errorMessage: 'Invalid Unsplash page URL. Please copy the full photo page URL.' 
+        };
+      }
+    } else {
+      // For other URLs, check if they look like image URLs
+      const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i;
+      if (!imageExtensions.test(url) && !url.includes('images.')) {
+        return { 
+          isValid: false, 
+          errorMessage: 'URL does not appear to be a valid image. Please use a direct image URL.' 
+        };
+      }
+    }
+
+    return { isValid: true };
+  };
 
   const handleIconSelect = (iconName: string) => {
     setFormSettings({ titleIcon: iconName });
@@ -51,14 +97,17 @@ export function FormHeaderSettings() {
 
   const handleCoverImageChange = (url: string) => {
     setCoverImageUrl(url);
+    setUrlValidationError(null);
+    
     if (url.trim()) {
-      // Basic URL validation
-      try {
-        new URL(url);
+      const validation = validateImageUrl(url.trim());
+      if (validation.isValid) {
         setIsValidImage(true);
-        setFormSettings({ coverImage: url });
-      } catch {
+        setFormSettings({ coverImage: url.trim() });
+      } else {
         setIsValidImage(false);
+        setUrlValidationError(validation.errorMessage || 'Invalid URL');
+        // Don't save invalid URLs to the form settings
       }
     } else {
       setIsValidImage(false);
@@ -69,6 +118,7 @@ export function FormHeaderSettings() {
   const handleCoverImageRemove = () => {
     setCoverImageUrl('');
     setIsValidImage(false);
+    setUrlValidationError(null);
     setFormSettings({ coverImage: undefined });
   };
 
@@ -150,8 +200,10 @@ export function FormHeaderSettings() {
           <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
             <p className="font-medium mb-1">💡 Using Unsplash images:</p>
             <p>1. Go to <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">unsplash.com</a></p>
-            <p>2. Right-click on any image → "Copy image address"</p>
-            <p>3. Paste the URL below (should start with https://images.unsplash.com/)</p>
+            <p>2. Copy the photo page URL or right-click → "Copy image address"</p>
+            <p>3. Paste the URL below (we support both formats)</p>
+            <p className="text-xs opacity-75 mt-1">✓ Photo page: https://unsplash.com/photos/...</p>
+            <p className="text-xs opacity-75">✓ Direct image: https://images.unsplash.com/...</p>
           </div>
           {formSettings.coverImage && isValidImage && (
             <div className="space-y-3">
@@ -182,10 +234,10 @@ export function FormHeaderSettings() {
               <Input
                 id="coverImage"
                 type="url"
-                placeholder="https://images.unsplash.com/photo-... or any image URL"
+                placeholder="https://unsplash.com/photos/... or https://images.unsplash.com/..."
                 value={coverImageUrl}
                 onChange={(e) => handleCoverImageChange(e.target.value)}
-                className="flex-1"
+                className={`flex-1 ${urlValidationError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
               />
               <Button
                 variant="outline"
@@ -199,11 +251,31 @@ export function FormHeaderSettings() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
                 >
-                  <ExternalLink className="h-4 w-4" />
-                  Unsplash
+                  <Search className="h-4 w-4" />
+                  Browse
                 </a>
               </Button>
             </div>
+            
+            {/* URL Validation Error */}
+            {urlValidationError && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="text-red-800 font-medium">Invalid URL</p>
+                  <p className="text-red-600 text-xs mt-1">{urlValidationError}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Success indicator */}
+            {coverImageUrl && isValidImage && !urlValidationError && (
+              <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <p className="text-sm text-green-800">Valid image URL</p>
+              </div>
+            )}
+            
             <p className="text-xs text-muted-foreground">
               Recommended: Use high-quality images with a 16:9 aspect ratio for best results.
             </p>

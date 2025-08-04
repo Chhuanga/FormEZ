@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TrendingUp, BarChart3, Users, Calendar, Download, Share, Eye, Target, Filter, Clock, ArrowUp, ArrowDown, Minus, BarChart, LineChart, FilterX, Search, Hash } from 'lucide-react';
+import { TrendingUp, BarChart3, Users, Calendar, Download, Share, Eye, Target, Filter, Clock, ArrowUp, ArrowDown, Minus, BarChart, LineChart, FilterX, Search, Hash, Brain } from 'lucide-react';
 import { format, parseISO, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import { MiniSparkline } from '@/components/ui/mini-sparkline';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AIAnalyticsSummary } from './AIAnalyticsSummary';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -737,6 +738,20 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
           </Card>
         </div>
       </TooltipProvider>
+
+      {/* AI Analytics Summary Section */}
+      <div className="space-y-3 md:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2">
+            <Brain className="h-5 w-5 text-purple-600" />
+            AI-Powered Insights
+          </h2>
+          <Badge variant="secondary" className="text-xs w-fit">
+            Powered by Gemini AI
+          </Badge>
+        </div>
+        <AIAnalyticsSummary formId={formId} dateRange={dateRange} />
+      </div>
 
       {/* Enhanced Trends Section */}
       <div className="space-y-3 md:space-y-4">

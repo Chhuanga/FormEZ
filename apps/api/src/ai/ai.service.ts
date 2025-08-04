@@ -210,4 +210,149 @@ export class AiService {
       throw error;
     }
   }
+
+  async generateAnalyticsSummary(
+    formData: any,
+    analyticsData: any,
+  ): Promise<string> {
+    if (!this.isApiKeyValid) {
+      throw new InternalServerErrorException(
+        'AI features are currently unavailable. Please check the server configuration.',
+      );
+    }
+
+    const prompt = this.getAnalyticsPrompt(formData, analyticsData);
+    
+    try {
+      const rawResponse = await this.callGemini(prompt);
+      // Clean the response to remove markdown formatting
+      const cleanedResponse = this.cleanMarkdownFormatting(rawResponse);
+      return cleanedResponse;
+    } catch (error) {
+      console.error('Error generating analytics summary:', error);
+      throw new InternalServerErrorException(
+        'Failed to generate analytics summary. Please try again.',
+      );
+    }
+  }
+
+  private cleanMarkdownFormatting(text: string): string {
+    return text
+      // Remove bold formatting
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      // Remove italic formatting
+      .replace(/\*(.*?)\*/g, '$1')
+      // Remove numbered list markdown
+      .replace(/^\d+\.\s\*\*(.*?)\*\*:/gm, '$1:')
+      // Remove any remaining ** 
+      .replace(/\*\*/g, '')
+      // Remove markdown headers
+      .replace(/^#+\s/gm, '')
+      // Clean up extra whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  private getAnalyticsPrompt(formData: any, analyticsData: any): string {
+    const formTitle = (formData?.title as string) || 'Untitled Form';
+    const totalSubmissions = analyticsData?.submissionTrend?.reduce(
+      (sum: number, day: any) => sum + (day?.count || 0),
+      0,
+    ) || 0;
+    const completionRate = analyticsData?.completionRate
+      ? (analyticsData.completionRate * 100).toFixed(1)
+      : '0';
+    const totalViews = analyticsData?.views || 0;
+
+    // Prepare field analytics summary
+    const fieldInsights =
+      analyticsData?.fieldAnalytics
+        ?.map((field: any) => {
+          const totalResponses = field?.options?.reduce(
+            (sum: number, opt: any) => sum + (opt?.count || 0),
+            0,
+          ) || 0;
+          const topResponse = field?.options?.reduce(
+            (max: any, opt: any) =>
+              (opt?.count || 0) > (max?.count || 0) ? opt : max,
+            { option: 'None', count: 0 },
+          ) || { option: 'None', count: 0 };
+          return `${field?.label || 'Unknown Field'} (${field?.type || 'Unknown'}): ${totalResponses} responses, most popular: "${topResponse?.option || 'None'}" (${topResponse?.count || 0} times)`;
+        })
+        ?.join('\n') || 'No field analytics available';
+
+    // Prepare text analytics insights
+    const textInsights =
+      analyticsData?.textAnalytics
+        ?.map((field: any) => {
+          const topWords =
+            field?.wordFrequencies
+              ?.slice(0, 5)
+              ?.map((w: any) => `"${w?.word || 'unknown'}" (${w?.count || 0})`)
+              ?.join(', ') || 'No words';
+          return `${field?.label || 'Unknown Field'}: Top words - ${topWords}`;
+        })
+        ?.join('\n') || 'No text analytics available';
+
+    // Submission trend analysis
+    const trendData = analyticsData?.submissionTrend || [];
+    const recentTrend = trendData.slice(-7); // Last 7 days
+    const avgRecent =
+      recentTrend.reduce(
+        (sum: number, day: any) => sum + (day?.count || 0),
+        0,
+      ) / Math.max(recentTrend.length, 1);
+
+    return `You are an expert data analyst and user experience researcher. Analyze the following form analytics data and provide a comprehensive summary with insights and sentiment analysis.
+
+Form Information:
+- Title: "${formTitle}"
+- Total Submissions: ${totalSubmissions}
+- Total Views: ${totalViews}
+- Completion Rate: ${completionRate}%
+
+Field Analytics:
+${fieldInsights}
+
+Text Field Insights:
+${textInsights}
+
+Submission Trends:
+- Average submissions in last 7 days: ${avgRecent.toFixed(1)}
+- Peak day: ${
+      trendData.length > 0
+        ? trendData.reduce(
+            (max: any, day: any) =>
+              (day?.count || 0) > (max?.count || 0) ? day : max,
+            { date: 'N/A', count: 0 },
+          )?.date || 'N/A'
+        : 'N/A'
+    }
+
+Please provide a comprehensive analysis that includes the following sections. For each section, start with the section name followed by a colon, then provide the analysis in clear, professional language:
+
+1. Overall Performance Summary: How is the form performing in terms of engagement and completion?
+
+2. Statistical Insights: Key metrics and what they indicate about user behavior.
+
+3. User Sentiment Analysis: Based on the response patterns and text analysis, what can you infer about user sentiment and satisfaction?
+
+4. Response Pattern Analysis: What do the choice field responses tell us about user preferences and behavior?
+
+5. Recommendations: Specific actionable suggestions to improve form performance, user experience, or data collection.
+
+6. Trends and Patterns: What temporal patterns or behavioral insights can you identify?
+
+IMPORTANT FORMATTING RULES:
+- Use PLAIN TEXT only - no markdown formatting
+- Do NOT use asterisks (*) or any other markdown symbols
+- Do NOT use bold (**text**) or italic (*text*) formatting
+- Simply write section names followed by a colon
+- Write in clear, professional language as if presenting to a business stakeholder
+- Focus on actionable insights and avoid overly technical jargon
+- If data is limited, acknowledge this and suggest ways to gather more meaningful insights
+- Use simple paragraph breaks for readability
+
+Return the analysis as clean plain text without any formatting symbols.`;
+  }
 }
