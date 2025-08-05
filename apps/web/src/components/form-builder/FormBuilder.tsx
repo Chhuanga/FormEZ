@@ -149,16 +149,61 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         };
       }
       
+      // Ensure options are consistently formatted for choice fields
+      if (cleanField.options && (
+        cleanField.type === 'RadioGroup' || 
+        cleanField.type === 'Select' || 
+        cleanField.type === 'Checkbox'
+      )) {
+        cleanField.options = cleanField.options.map((option, index) => {
+          if (typeof option === 'string') {
+            return {
+              label: option,
+              value: option.toLowerCase().replace(/\s+/g, '_') || `option_${index + 1}`
+            };
+          }
+          return option;
+        });
+      }
+      
       return cleanField;
     });
+
+    // Ensure postSubmissionSettings has valid structure for API validation
+    const validatedPostSubmissionSettings = (() => {
+      if (!postSubmissionSettings || !postSubmissionSettings.type) {
+        return {
+          type: 'message',
+          message: 'Thanks for your submission!',
+        };
+      }
+      
+      if (postSubmissionSettings.type === 'message') {
+        return {
+          type: 'message',
+          message: postSubmissionSettings.message || 'Thanks for your submission!',
+        };
+      }
+      
+      if (postSubmissionSettings.type === 'redirect') {
+        return {
+          type: 'redirect',
+          url: postSubmissionSettings.url || 'https://example.com',
+        };
+      }
+      
+      return postSubmissionSettings;
+    })();
 
     const body = {
       title: formTitle,
       fields: cleanedFields,
       theme: theme,
       formSettings: formSettings,
-      postSubmissionSettings: postSubmissionSettings,
+      postSubmissionSettings: validatedPostSubmissionSettings,
     };
+
+    console.log('Sending form data:', body);
 
     try {
       const token = await user.getIdToken();
@@ -172,7 +217,14 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save form');
+        const errorText = await response.text();
+        console.error('Form save error details:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          sentData: body
+        });
+        throw new Error(`Failed to save form: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const savedForm = await response.json();
@@ -236,7 +288,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         fieldType === 'Select' ||
         fieldType === 'Checkbox'
       ) {
-        newField.options = ['Option 1'];
+        newField.options = [{ label: 'Option 1', value: 'option_1' }];
       }
       
       const overIndex = fields.findIndex((f) => f.id === over.id);

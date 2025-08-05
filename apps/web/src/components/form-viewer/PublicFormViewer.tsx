@@ -228,7 +228,7 @@ const PublicFormField: React.FC<PublicFormFieldProps> = ({ field, value, onChang
 // Utility function to convert Unsplash page URLs to proper image URLs (same as Canvas)
 const validateAndConvertImageUrl = (url: string): { isValid: boolean; convertedUrl: string; errorMessage?: string } => {
   if (!url || typeof url !== 'string') {
-    return { isValid: false, convertedUrl: url, errorMessage: 'Invalid URL provided' };
+    return { isValid: false, convertedUrl: url || '', errorMessage: 'Invalid URL provided' };
   }
 
   if (url.includes('images.unsplash.com')) {

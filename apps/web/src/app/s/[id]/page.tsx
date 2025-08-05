@@ -16,6 +16,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Calendar as CalendarIcon, CheckCircle, AlertCircle, HelpCircle, Send, Smile, Star, Heart, Zap, Award, Target, Rocket, Crown, Gift } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { RestrictedFormAccess } from '@/components/auth/RestrictedFormAccess';
 
 interface Form {
   id: string;
@@ -25,6 +27,10 @@ interface Form {
   formSettings?: {
     titleIcon?: string;
     coverImage?: string;
+    accessConditions?: {
+      requireLogin?: boolean;
+      allowedEmailDomains?: string[];
+    };
   };
   postSubmissionSettings: {
     type: 'message' | 'redirect';
@@ -503,11 +509,14 @@ const renderField = (
 export default function SubmissionPage() {
   const params = useParams();
   const id = params?.id as string;
+  const { user, loading: authLoading } = useAuth();
   const [form, setForm] = useState<Form | null>(null);
   const [answers, setAnswers] = useState<any>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<'success' | 'error' | null>(null);
+  const [showAuthRequired, setShowAuthRequired] = useState(false);
+  const [accessCheckComplete, setAccessCheckComplete] = useState(false);
 
   const { fields, theme, title } = useMemo(() => {
     return {
@@ -549,6 +558,55 @@ export default function SubmissionPage() {
 
     fetchForm();
   }, [id]);
+
+  // Check access conditions after form is loaded and auth state is known
+  useEffect(() => {
+    if (authLoading || !form || accessCheckComplete) return;
+
+    const accessConditions = form.formSettings?.accessConditions;
+    
+    // If no access conditions or login not required, allow access
+    if (!accessConditions?.requireLogin) {
+      setAccessCheckComplete(true);
+      return;
+    }
+
+    // If login is required but user is not authenticated
+    if (!user) {
+      setShowAuthRequired(true);
+      setAccessCheckComplete(true);
+      return;
+    }
+
+    // Check email domain restrictions if user is authenticated
+    const allowedDomains = accessConditions.allowedEmailDomains;
+    if (allowedDomains && allowedDomains.length > 0) {
+      const userEmail = user.email;
+      if (!userEmail) {
+        setShowAuthRequired(true);
+        setAccessCheckComplete(true);
+        return;
+      }
+
+      const userDomain = userEmail.split('@')[1];
+      if (!allowedDomains.includes(userDomain)) {
+        // User is authenticated but their domain is not allowed
+        alert(`Access denied. This form is restricted to users from: ${allowedDomains.join(', ')}`);
+        setShowAuthRequired(true);
+        setAccessCheckComplete(true);
+        return;
+      }
+    }
+
+    // User has access
+    setAccessCheckComplete(true);
+  }, [form, user, authLoading, accessCheckComplete]);
+
+  const handleAuthSuccess = () => {
+    setShowAuthRequired(false);
+    // Re-run access check
+    setAccessCheckComplete(false);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -601,8 +659,23 @@ export default function SubmissionPage() {
     }
   };
 
-  if (!form) {
+  if (authLoading || !accessCheckComplete) {
     return <div className="flex h-full items-center justify-center">Loading...</div>;
+  }
+
+  if (!form) {
+    return <div className="flex h-full items-center justify-center">Form not found</div>;
+  }
+
+  // Show authentication screen if access is restricted
+  if (showAuthRequired) {
+    return (
+      <RestrictedFormAccess
+        onAuthSuccess={handleAuthSuccess}
+        formTitle={form.title}
+        allowedEmailDomains={form.formSettings?.accessConditions?.allowedEmailDomains}
+      />
+    );
   }
   
   if (submissionResult === 'success') {

@@ -16,7 +16,7 @@ interface CanvasProps {
 // Utility function to validate and convert Unsplash URLs
 const validateAndConvertImageUrl = (url: string): { isValid: boolean; convertedUrl: string; errorMessage?: string } => {
   if (!url || typeof url !== 'string') {
-    return { isValid: false, convertedUrl: url, errorMessage: 'Invalid URL provided' };
+    return { isValid: false, convertedUrl: url || '', errorMessage: 'Invalid URL provided' };
   }
 
   // If it's already a proper image URL from a known source, validate it
@@ -38,7 +38,7 @@ const validateAndConvertImageUrl = (url: string): { isValid: boolean; convertedU
     const match = url.match(/unsplash\.com\/photos\/[^\/]*-([a-zA-Z0-9_-]+)$/);
     if (match && match[1] && match[1].length >= 10) {
       // Convert to proper image URL with decent resolution
-      const convertedUrl = `https://images.unsplash.com/photo-${match[1]}?w=800&h=400&fit=crop&crop=top`;
+      const convertedUrl = `https://images.unsplash.com/photo-${match[1]}?w=1200&h=600&fit=crop&crop=top`;
       return { isValid: true, convertedUrl };
     }
     return { 
