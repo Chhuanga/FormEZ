@@ -9,7 +9,6 @@ import { Plus, Smile, Star, Heart, Zap, Award, Target, Rocket, Crown, Gift, Imag
 import { useState } from 'react';
 
 interface CanvasProps {
-  viewMode: 'single' | 'two';
   id?: string;
   formTitle?: string;
 }
@@ -178,7 +177,7 @@ const CoverImageContainer: React.FC<CoverImageContainerProps> = ({ coverImage })
   );
 };
 
-export function Canvas({ viewMode, id, formTitle = 'Untitled Form' }: CanvasProps) {
+export function Canvas({ id, formTitle = 'Untitled Form' }: CanvasProps) {
   const { fields, theme, formSettings } = useFormStore();
   const { setNodeRef, isOver } = useDroppable({ id: 'canvas' });
 
@@ -204,8 +203,8 @@ export function Canvas({ viewMode, id, formTitle = 'Untitled Form' }: CanvasProp
     fontFamily: theme.fontFamily,
   };
 
-  const maxWidth = viewMode === 'two' ? 'max-w-6xl' : 'max-w-2xl';
-  const gridColumns = viewMode === 'two' ? 'grid grid-cols-2 gap-6' : 'space-y-0';
+  const maxWidth = 'max-w-2xl';
+  const gridColumns = 'space-y-0';
 
   // Helper function to determine if we should add a section divider
   const shouldAddDivider = (currentIndex: number) => {

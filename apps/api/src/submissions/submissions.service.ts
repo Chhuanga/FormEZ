@@ -7,7 +7,51 @@ import { PrismaService } from '../prisma/prisma.service';
 import { IntegrationsService } from '../integrations/integrations.service';
 import { AiService } from '../ai/ai.service';
 import { AnswerDto, CreateSubmissionDto } from './dto/create-submission.dto';
-import { Answer, Form, FormSubmission, FormView } from '@prisma/client';
+
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+  validation?: {
+    required?: boolean;
+  };
+}
+
+// Define basic types to match Prisma models
+type Form = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  title: string;
+  fields: any;
+  theme: any;
+  formSettings: any;
+  postSubmissionSettings: any;
+  userId: string | null;
+};
+
+type FormView = {
+  id: string;
+  createdAt: Date;
+  formId: string;
+};
+
+type Answer = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  fieldId: string;
+  value: any;
+  submissionId: string;
+  file?: any;
+};
+
+type FormSubmission = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  formId: string;
+};
 
 interface FormField {
   id: string;
@@ -105,7 +149,7 @@ export class SubmissionsService {
   ) {}
 
   async create(formId: string, createSubmissionDto: CreateSubmissionDto) {
-    const form = await this.prisma.form.findUnique({
+    const form = await (this.prisma as any).form.findUnique({
       where: { id: formId },
     });
 
@@ -131,7 +175,7 @@ export class SubmissionsService {
       }
     }
 
-    const submission = await this.prisma.formSubmission.create({
+    const submission = await (this.prisma as any).formSubmission.create({
       data: {
         formId,
         answers: {
@@ -163,7 +207,7 @@ export class SubmissionsService {
 
   async findByFormId(formId: string, userId: string) {
     // First, verify the user owns this form
-    const form = await this.prisma.form.findUnique({
+    const form = await (this.prisma as any).form.findUnique({
       where: { id: formId, userId },
       include: {
         submissions: {
@@ -216,7 +260,7 @@ export class SubmissionsService {
       dateFilter.lte = new Date(dateRange.to);
     }
 
-    const form = (await this.prisma.form.findUnique({
+    const form = (await (this.prisma as any).form.findUnique({
       where: { id: formId, userId },
       include: {
         submissions: {
@@ -374,7 +418,7 @@ export class SubmissionsService {
     dateRange?: { from: string; to: string },
   ) {
     // Get the form data and analytics data
-    const form = await this.prisma.form.findUnique({
+    const form = await (this.prisma as any).form.findUnique({
       where: { id: formId, userId },
     });
 
@@ -444,7 +488,7 @@ export class SubmissionsService {
   }
 
   async findOne(submissionId: string, userId: string) {
-    const submission = await this.prisma.formSubmission.findUnique({
+    const submission = await (this.prisma as any).formSubmission.findUnique({
       where: { id: submissionId },
       include: {
         form: {

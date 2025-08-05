@@ -90,7 +90,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     label: string;
     icon: React.ReactNode;
   } | null>(null);
-  const [viewMode, setViewMode] = useState<'single' | 'two'>('single');
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -409,30 +408,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
                       </PopoverContent>
                     </Popover>
                   </div>
-
-                  {/* View Mode Toggle - Hide on mobile */}
-                  <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-muted rounded-lg">
-                    <button
-                      onClick={() => setViewMode('single')}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        viewMode === 'single'
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Mobile
-                    </button>
-                    <button
-                      onClick={() => setViewMode('two')}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        viewMode === 'two'
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Desktop
-                    </button>
-                  </div>
                 </div>
 
                 {/* Right: Save Button */}
@@ -463,7 +438,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           {/* Main content */}
           <main className="flex-1 flex min-h-0 overflow-hidden">
             <div className="flex-1 relative min-w-0 overflow-y-auto">
-              <Canvas id="form-canvas" viewMode={viewMode} formTitle={formTitle} />
+              <Canvas id="form-canvas" formTitle={formTitle} />
             </div>
             
             {/* Settings Sidebar - Responsive and sticky */}
@@ -511,6 +486,7 @@ function UnitInput({ value, onChange, suffix, className }: { value: number; onCh
         value={value || 0}
         onChange={(e) => onChange(e.target.valueAsNumber || 0)}
         className="h-8 pr-8"
+     
       />
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
         {suffix}

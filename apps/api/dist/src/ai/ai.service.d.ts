@@ -26,4 +26,7 @@ export declare class AiService {
     } | {
         questions: RefinementQuestion[];
     }>;
+    generateAnalyticsSummary(formData: any, analyticsData: any): Promise<string>;
+    private cleanMarkdownFormatting;
+    private getAnalyticsPrompt;
 }

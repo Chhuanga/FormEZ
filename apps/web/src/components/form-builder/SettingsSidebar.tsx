@@ -5,8 +5,9 @@ import { useState } from 'react';
 import { SettingsTabs } from './SettingsTabs';
 import { FormHeaderSettings } from './FormHeaderSettings';
 import { useFormStore } from '@/store/form';
-import { Eye, Brush, Settings, Send, Image } from 'lucide-react';
+import { Eye, Brush, Settings, Send, Image, Shield } from 'lucide-react';
 import { PostSubmissionSettings } from './PostSubmissionSettings';
+import { AccessConditionsSettings } from './AccessConditionsSettings';
 
 function NoFieldSelected() {
   return (
@@ -25,7 +26,7 @@ function NoFieldSelected() {
 
 export function SettingsSidebar() {
   const { fields, selectedFieldId, setSelectedFieldId } = useFormStore();
-  const [view, setView] = useState<'field' | 'header' | 'theme' | 'post-submission'>('field');
+  const [view, setView] = useState<'field' | 'header' | 'theme' | 'post-submission' | 'access'>('field');
 
   const selectedField = fields.find((f) => f.id === selectedFieldId);
 
@@ -46,6 +47,7 @@ export function SettingsSidebar() {
           )}
           {currentView === 'header' && <FormHeaderSettings />}
           {/* {currentView === 'theme' && <ThemeSettings />} */}
+          {currentView === 'access' && <AccessConditionsSettings />}
           {currentView === 'post-submission' && <PostSubmissionSettings />}
         </div>
       </div>
@@ -75,6 +77,18 @@ export function SettingsSidebar() {
         >
           <Image className="h-4 w-4 mb-1" />
           <span className="text-xs font-medium">Header</span>
+        </button>
+        
+        <button
+          onClick={() => {
+            setView('access');
+            setSelectedFieldId(null);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center py-2 rounded-md transition-colors ${currentView === 'access' ? 'text-primary bg-muted' : 'text-muted-foreground hover:bg-muted/50'}`}
+          title="Access Conditions"
+        >
+          <Shield className="h-4 w-4 mb-1" />
+          <span className="text-xs font-medium">Access</span>
         </button>
         
         {/* <button

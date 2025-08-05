@@ -13,6 +13,7 @@ exports.SubmissionsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const integrations_service_1 = require("../integrations/integrations.service");
+const ai_service_1 = require("../ai/ai.service");
 const STOP_WORDS = new Set([
     'a',
     'an',
@@ -85,9 +86,11 @@ const STOP_WORDS = new Set([
 let SubmissionsService = class SubmissionsService {
     prisma;
     integrationsService;
-    constructor(prisma, integrationsService) {
+    aiService;
+    constructor(prisma, integrationsService, aiService) {
         this.prisma = prisma;
         this.integrationsService = integrationsService;
+        this.aiService = aiService;
     }
     async create(formId, createSubmissionDto) {
         const form = await this.prisma.form.findUnique({
@@ -207,7 +210,10 @@ let SubmissionsService = class SubmissionsService {
         formFields.forEach((field) => {
             if (['RadioGroup', 'Select', 'Checkbox'].includes(field.type)) {
                 const counts = new Map();
-                field.options?.forEach((option) => counts.set(option, 0));
+                field.options?.forEach((option) => {
+                    const optionValue = typeof option === 'string' ? option : option.value;
+                    counts.set(optionValue, 0);
+                });
                 choiceFieldAnalytics.set(field.id, counts);
             }
             else if (['Input', 'Textarea', 'Email'].includes(field.type)) {
@@ -299,6 +305,22 @@ let SubmissionsService = class SubmissionsService {
             },
         };
     }
+    async getAiAnalyticsSummary(formId, userId, dateRange) {
+        const form = await this.prisma.form.findUnique({
+            where: { id: formId, userId },
+        });
+        if (!form) {
+            throw new common_1.NotFoundException('Form not found or you do not have permission to view its analytics');
+        }
+        const analyticsData = await this.getAnalyticsByFormId(formId, userId, dateRange);
+        const aiSummary = await this.aiService.generateAnalyticsSummary(form, analyticsData);
+        return {
+            summary: aiSummary,
+            generatedAt: new Date().toISOString(),
+            formId,
+            dateRange,
+        };
+    }
     _calculateNumericStats(values) {
         if (values.length === 0) {
             return { count: 0, sum: 0, mean: 0, min: 0, max: 0, histogram: [] };
@@ -363,6 +385,7 @@ exports.SubmissionsService = SubmissionsService;
 exports.SubmissionsService = SubmissionsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        integrations_service_1.IntegrationsService])
+        integrations_service_1.IntegrationsService,
+        ai_service_1.AiService])
 ], SubmissionsService);
 //# sourceMappingURL=submissions.service.js.map

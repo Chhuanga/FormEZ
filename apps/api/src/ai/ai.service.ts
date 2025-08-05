@@ -47,9 +47,14 @@ export class AiService {
       const response = result.response;
       let text = response.text();
 
-      const jsonMatch = text.match(/\[.*\]/s);
-      if (jsonMatch && jsonMatch[0]) {
-        text = jsonMatch[0];
+      // Try to extract JSON object or array from the response
+      const jsonObjectMatch = text.match(/\{[\s\S]*\}/s);
+      const jsonArrayMatch = text.match(/\[[\s\S]*\]/s);
+      
+      if (jsonObjectMatch && jsonObjectMatch[0]) {
+        text = jsonObjectMatch[0];
+      } else if (jsonArrayMatch && jsonArrayMatch[0]) {
+        text = jsonArrayMatch[0];
       } else {
         const markdownMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
         if (markdownMatch && markdownMatch[1]) {
@@ -101,7 +106,20 @@ export class AiService {
         ?.map((a) => `- Question: ${a.question}\n  - Answer: ${a.answer}`)
         .join('\n') || 'N/A';
 
-    return `You are an expert form builder assistant. Based on the user's request and their answers to clarifying questions, generate a JSON array of form fields.
+    return `You are an expert form builder assistant. Based on the user's request and their answers to clarifying questions, generate a JSON object containing both a title and form fields.
+
+    The response should be a JSON object with this structure:
+    {
+      "title": "A descriptive, contextual title for the form",
+      "fields": [array of form field objects]
+    }
+
+    Rules for the title:
+    - Should be professional and descriptive
+    - Should reflect the purpose and context of the form
+    - Should be concise (3-8 words typically)
+    - Should NOT include "AI:" prefix
+    - Examples: "Customer Feedback Survey", "Event Registration Form", "Employee Onboarding Form", "Product Review Form"
 
     Rules for fields:
     - "id" must be a unique, snake_case string.
@@ -133,7 +151,7 @@ export class AiService {
     Clarifying Answers:
     ${answersPart}
 
-    Output only the raw JSON array.`;
+    Output only the raw JSON object with title and fields.`;
   }
 
   private async generateForm(dto: GenerateFormWithAiDto, user: DecodedIdToken) {
@@ -141,15 +159,39 @@ export class AiService {
     const rawResponse = await this.callGemini(prompt);
 
     try {
-      const generatedFields = JSON.parse(rawResponse) as FormFieldDto[];
-      const newForm = await this.formsService.create(
-        {
-          title: `AI: ${dto.prompt.substring(0, 40)}...`,
-          fields: generatedFields,
-        },
-        user.uid,
-      );
-      return { form: newForm };
+      const parsed = JSON.parse(rawResponse);
+      
+      // Handle new format (object with title and fields)
+      if (parsed.title && parsed.fields) {
+        const response = parsed as {
+          title: string;
+          fields: FormFieldDto[];
+        };
+        
+        const newForm = await this.formsService.create(
+          {
+            title: response.title,
+            fields: response.fields,
+          },
+          user.uid,
+        );
+        return { form: newForm };
+      }
+      
+      // Handle old format (just array of fields) - fallback
+      if (Array.isArray(parsed)) {
+        const generatedFields = parsed as FormFieldDto[];
+        const newForm = await this.formsService.create(
+          {
+            title: `AI: ${dto.prompt.substring(0, 40)}...`,
+            fields: generatedFields,
+          },
+          user.uid,
+        );
+        return { form: newForm };
+      }
+      
+      throw new Error('Unexpected response format from AI');
     } catch (parseError) {
       console.error(
         'Failed to parse form generation response as JSON:',
@@ -237,20 +279,24 @@ export class AiService {
   }
 
   private cleanMarkdownFormatting(text: string): string {
-    return text
-      // Remove bold formatting
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      // Remove italic formatting
-      .replace(/\*(.*?)\*/g, '$1')
-      // Remove numbered list markdown
-      .replace(/^\d+\.\s\*\*(.*?)\*\*:/gm, '$1:')
-      // Remove any remaining ** 
-      .replace(/\*\*/g, '')
-      // Remove markdown headers
-      .replace(/^#+\s/gm, '')
-      // Clean up extra whitespace
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    return (
+      text
+        // Remove code blocks
+        .replace(/```(.*?)```/gs, '$1')
+        // Remove bold formatting
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        // Remove italic formatting
+        .replace(/\*(.*?)\*/g, '$1')
+        // Remove numbered list markdown
+        .replace(/^\d+\.\s\*\*(.*?)\*\*:/gm, '$1:')
+        // Remove any remaining **
+        .replace(/\*\*/g, '')
+        // Remove markdown headers
+        .replace(/^#+\s/gm, '')
+        // Clean up extra whitespace
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+    );
   }
 
   private getAnalyticsPrompt(formData: any, analyticsData: any): string {

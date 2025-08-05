@@ -12,12 +12,13 @@ const submissions_controller_1 = require("./submissions.controller");
 const submissions_service_1 = require("./submissions.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const integrations_module_1 = require("../integrations/integrations.module");
+const ai_module_1 = require("../ai/ai.module");
 let SubmissionsModule = class SubmissionsModule {
 };
 exports.SubmissionsModule = SubmissionsModule;
 exports.SubmissionsModule = SubmissionsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, integrations_module_1.IntegrationsModule],
+        imports: [prisma_module_1.PrismaModule, integrations_module_1.IntegrationsModule, ai_module_1.AiModule],
         controllers: [submissions_controller_1.SubmissionsController],
         providers: [submissions_service_1.SubmissionsService],
     })

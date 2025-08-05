@@ -76,6 +76,7 @@ async function main() {
         update: {},
         create: {
             id: testUserId,
+            email: `${testUserId}@test.firebase`,
         },
     });
     console.log(`Seeding for user: ${user.id}`);
@@ -94,6 +95,10 @@ async function main() {
                 formBackgroundColor: '#FFFFFF',
                 borderColor: '#E2E8F0',
                 buttonTextColor: '#FFFFFF',
+            },
+            formSettings: {
+                titleIcon: 'Star',
+                coverImage: 'https://images.unsplash.com/photo-1556745757-8d76bac6ab00?auto=format&fit=crop&w=1200&q=80',
             },
             postSubmissionSettings: {
                 type: 'message',
