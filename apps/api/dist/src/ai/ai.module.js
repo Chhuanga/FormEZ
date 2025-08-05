@@ -19,6 +19,7 @@ exports.AiModule = AiModule = __decorate([
         imports: [forms_module_1.FormsModule],
         controllers: [ai_controller_1.AiController],
         providers: [ai_service_1.AiService],
+        exports: [ai_service_1.AiService],
     })
 ], AiModule);
 //# sourceMappingURL=ai.module.js.map

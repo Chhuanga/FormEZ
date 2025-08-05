@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IntegrationsService } from '../integrations/integrations.service';
+import { AiService } from '../ai/ai.service';
 import { AnswerDto, CreateSubmissionDto } from './dto/create-submission.dto';
-import { Answer, Form, FormSubmission, FormView } from '@prisma/client';
 
 interface FormField {
   id: string;
@@ -15,7 +15,52 @@ interface FormField {
   validation?: {
     required?: boolean;
   };
-  options?: string[];
+}
+
+// Define basic types to match Prisma models
+type Form = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  title: string;
+  fields: any;
+  theme: any;
+  formSettings: any;
+  postSubmissionSettings: any;
+  userId: string | null;
+};
+
+type FormView = {
+  id: string;
+  createdAt: Date;
+  formId: string;
+};
+
+type Answer = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  fieldId: string;
+  value: any;
+  submissionId: string;
+  file?: any;
+};
+
+type FormSubmission = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  formId: string;
+};
+
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+  validation?: {
+    required?: boolean;
+  };
+  options?: (string | { value: string; label: string })[];
 }
 
 type FormWithAnalytics = Form & {
@@ -100,10 +145,11 @@ export class SubmissionsService {
   constructor(
     private prisma: PrismaService,
     private integrationsService: IntegrationsService,
+    private aiService: AiService,
   ) {}
 
   async create(formId: string, createSubmissionDto: CreateSubmissionDto) {
-    const form = await this.prisma.form.findUnique({
+    const form = await (this.prisma as any).form.findUnique({
       where: { id: formId },
     });
 
@@ -129,7 +175,7 @@ export class SubmissionsService {
       }
     }
 
-    const submission = await this.prisma.formSubmission.create({
+    const submission = await (this.prisma as any).formSubmission.create({
       data: {
         formId,
         answers: {
@@ -161,7 +207,7 @@ export class SubmissionsService {
 
   async findByFormId(formId: string, userId: string) {
     // First, verify the user owns this form
-    const form = await this.prisma.form.findUnique({
+    const form = await (this.prisma as any).form.findUnique({
       where: { id: formId, userId },
       include: {
         submissions: {
@@ -214,7 +260,7 @@ export class SubmissionsService {
       dateFilter.lte = new Date(dateRange.to);
     }
 
-    const form = (await this.prisma.form.findUnique({
+    const form = (await (this.prisma as any).form.findUnique({
       where: { id: formId, userId },
       include: {
         submissions: {
@@ -253,7 +299,12 @@ export class SubmissionsService {
     formFields.forEach((field) => {
       if (['RadioGroup', 'Select', 'Checkbox'].includes(field.type)) {
         const counts = new Map<string, number>();
-        field.options?.forEach((option) => counts.set(option, 0));
+        field.options?.forEach((option) => {
+          // Handle both string options and object options with value/label
+          const optionValue =
+            typeof option === 'string' ? option : option.value;
+          counts.set(optionValue, 0);
+        });
         choiceFieldAnalytics.set(field.id, counts);
       } else if (['Input', 'Textarea', 'Email'].includes(field.type)) {
         textFieldAnalytics.set(field.id, new Map<string, number>());
@@ -361,6 +412,42 @@ export class SubmissionsService {
     };
   }
 
+  async getAiAnalyticsSummary(
+    formId: string,
+    userId: string,
+    dateRange?: { from: string; to: string },
+  ) {
+    // Get the form data and analytics data
+    const form = await (this.prisma as any).form.findUnique({
+      where: { id: formId, userId },
+    });
+
+    if (!form) {
+      throw new NotFoundException(
+        'Form not found or you do not have permission to view its analytics',
+      );
+    }
+
+    const analyticsData = await this.getAnalyticsByFormId(
+      formId,
+      userId,
+      dateRange,
+    );
+
+    // Generate AI summary using the AI service
+    const aiSummary = await this.aiService.generateAnalyticsSummary(
+      form,
+      analyticsData,
+    );
+
+    return {
+      summary: aiSummary,
+      generatedAt: new Date().toISOString(),
+      formId,
+      dateRange,
+    };
+  }
+
   private _calculateNumericStats(values: number[]) {
     if (values.length === 0) {
       return { count: 0, sum: 0, mean: 0, min: 0, max: 0, histogram: [] };
@@ -401,7 +488,7 @@ export class SubmissionsService {
   }
 
   async findOne(submissionId: string, userId: string) {
-    const submission = await this.prisma.formSubmission.findUnique({
+    const submission = await (this.prisma as any).formSubmission.findUnique({
       where: { id: submissionId },
       include: {
         form: {

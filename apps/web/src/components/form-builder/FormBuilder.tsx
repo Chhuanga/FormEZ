@@ -90,7 +90,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     label: string;
     icon: React.ReactNode;
   } | null>(null);
-  const [viewMode, setViewMode] = useState<'single' | 'two'>('single');
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -136,9 +135,26 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     const endpoint = `/api/forms/${initialData.id}`;
     const method = 'PATCH';
 
+    // Clean up fields to ensure proper structure
+    const cleanedFields = fields.map(field => {
+      const cleanField = { ...field };
+      
+      // If there's a direct 'required' property, move it to validation
+      if ((cleanField as any).required !== undefined) {
+        const required = (cleanField as any).required;
+        delete (cleanField as any).required;
+        cleanField.validation = { 
+          ...cleanField.validation, 
+          required: required 
+        };
+      }
+      
+      return cleanField;
+    });
+
     const body = {
       title: formTitle,
-      fields: fields,
+      fields: cleanedFields,
       theme: theme,
       formSettings: formSettings,
       postSubmissionSettings: postSubmissionSettings,
@@ -156,34 +172,21 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
       });
 
       if (!response.ok) {
-        let errorData;
-        const responseClone = response.clone(); // Clone the response
-        try {
-          // Try to parse the error response as JSON from the original response
-          errorData = await response.json();
-          console.error('Error response from server (JSON):', errorData);
-          const message = errorData.message || 'Failed to save form';
-          throw new Error(message);
-        } catch (e) {
-          // If parsing as JSON fails, read as text from the clone
-          errorData = await responseClone.text();
-          console.error('Error response from server (text):', errorData);
-          throw new Error('Failed to save form');
-        }
+        throw new Error('Failed to save form');
       }
 
       const savedForm = await response.json();
-      console.log('Form saved successfully:', savedForm);
       
+      // Visual feedback that form was saved
       const originalTitle = document.title;
-      document.title = '✓ Saved - FormEz';
+      document.title = '✓ Saved';
       setTimeout(() => {
         document.title = originalTitle;
       }, 2000);
       
     } catch (error) {
       console.error('Error saving form:', error);
-      alert('Error saving form. See console for details.');
+      alert('Failed to save form. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -405,30 +408,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
                       </PopoverContent>
                     </Popover>
                   </div>
-
-                  {/* View Mode Toggle - Hide on mobile */}
-                  <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-muted rounded-lg">
-                    <button
-                      onClick={() => setViewMode('single')}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        viewMode === 'single'
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Mobile
-                    </button>
-                    <button
-                      onClick={() => setViewMode('two')}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        viewMode === 'two'
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Desktop
-                    </button>
-                  </div>
                 </div>
 
                 {/* Right: Save Button */}
@@ -459,7 +438,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           {/* Main content */}
           <main className="flex-1 flex min-h-0 overflow-hidden">
             <div className="flex-1 relative min-w-0 overflow-y-auto">
-              <Canvas id="form-canvas" viewMode={viewMode} formTitle={formTitle} />
+              <Canvas id="form-canvas" formTitle={formTitle} />
             </div>
             
             {/* Settings Sidebar - Responsive and sticky */}
@@ -507,6 +486,7 @@ function UnitInput({ value, onChange, suffix, className }: { value: number; onCh
         value={value || 0}
         onChange={(e) => onChange(e.target.valueAsNumber || 0)}
         className="h-8 pr-8"
+     
       />
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
         {suffix}

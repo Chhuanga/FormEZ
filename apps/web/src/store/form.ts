@@ -56,6 +56,10 @@ export interface Theme {
 export interface FormSettings {
   titleIcon?: string; // Lucide icon name or emoji
   coverImage?: string; // URL to cover image
+  accessConditions?: {
+    requireLogin: boolean;
+    allowedEmailDomains: string[];
+  };
 }
 
 const defaultTheme: Theme = {

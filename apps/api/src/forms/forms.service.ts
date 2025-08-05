@@ -97,6 +97,7 @@ export class FormsService {
         title: updateFormDto.title,
         fields: updateFormDto.fields as unknown as Prisma.JsonArray,
         theme: updateFormDto.theme as Prisma.JsonObject,
+        formSettings: updateFormDto.formSettings as Prisma.JsonObject,
         postSubmissionSettings:
           (updateFormDto.postSubmissionSettings as Prisma.JsonObject) ||
           undefined,

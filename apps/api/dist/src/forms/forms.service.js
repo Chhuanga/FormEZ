@@ -24,7 +24,10 @@ let FormsService = class FormsService {
         await this.prisma.user.upsert({
             where: { id: userId },
             update: {},
-            create: { id: userId },
+            create: {
+                id: userId,
+                email: `${userId}@firebase.temp`,
+            },
         });
         return this.prisma.form.create({
             data: {
@@ -81,6 +84,7 @@ let FormsService = class FormsService {
                 title: updateFormDto.title,
                 fields: updateFormDto.fields,
                 theme: updateFormDto.theme,
+                formSettings: updateFormDto.formSettings,
                 postSubmissionSettings: updateFormDto.postSubmissionSettings ||
                     undefined,
             },

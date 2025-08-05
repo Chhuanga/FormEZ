@@ -3,5 +3,5 @@ import { AuthenticatedRequest } from '../auth/auth.decorators';
 export declare class AccountsController {
     private readonly integrationsService;
     constructor(integrationsService: IntegrationsService);
-    getAccounts(req: AuthenticatedRequest): Promise<never[]>;
+    getAccounts(req: AuthenticatedRequest): never[];
 }

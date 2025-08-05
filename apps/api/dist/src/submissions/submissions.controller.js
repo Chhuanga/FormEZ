@@ -34,6 +34,10 @@ let SubmissionsController = class SubmissionsController {
         const dateRange = from && to ? { from, to } : undefined;
         return this.submissionsService.getAnalyticsByFormId(formId, user.uid, dateRange);
     }
+    getAiAnalyticsSummary(formId, user, from, to) {
+        const dateRange = from && to ? { from, to } : undefined;
+        return this.submissionsService.getAiAnalyticsSummary(formId, user.uid, dateRange);
+    }
     findOne(submissionId, req) {
         const userId = req.user.uid;
         return this.submissionsService.findOne(submissionId, userId);
@@ -68,6 +72,17 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, String, String]),
     __metadata("design:returntype", void 0)
 ], SubmissionsController.prototype, "getAnalytics", null);
+__decorate([
+    (0, common_1.Get)('analytics/ai-summary'),
+    (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),
+    __param(0, (0, common_1.Param)('formId')),
+    __param(1, (0, auth_decorators_1.CurrentUser)()),
+    __param(2, (0, common_1.Query)('from')),
+    __param(3, (0, common_1.Query)('to')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, String, String]),
+    __metadata("design:returntype", void 0)
+], SubmissionsController.prototype, "getAiAnalyticsSummary", null);
 __decorate([
     (0, common_1.Get)(':submissionId'),
     (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),

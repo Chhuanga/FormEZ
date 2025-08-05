@@ -21,7 +21,7 @@ let AccountsController = class AccountsController {
     constructor(integrationsService) {
         this.integrationsService = integrationsService;
     }
-    async getAccounts(req) {
+    getAccounts(req) {
         const userId = req.user.uid;
         return this.integrationsService.getAccounts(userId);
     }
@@ -32,7 +32,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], AccountsController.prototype, "getAccounts", null);
 exports.AccountsController = AccountsController = __decorate([
     (0, common_1.Controller)('integrations/accounts'),

@@ -52,6 +52,22 @@ export class SubmissionsController {
     );
   }
 
+  @Get('analytics/ai-summary')
+  @UseGuards(FirebaseGuard)
+  getAiAnalyticsSummary(
+    @Param('formId') formId: string,
+    @CurrentUser() user: DecodedIdToken,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    const dateRange = from && to ? { from, to } : undefined;
+    return this.submissionsService.getAiAnalyticsSummary(
+      formId,
+      user.uid,
+      dateRange,
+    );
+  }
+
   @Get(':submissionId')
   @UseGuards(FirebaseGuard)
   findOne(

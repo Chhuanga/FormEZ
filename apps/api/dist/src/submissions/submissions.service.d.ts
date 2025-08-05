@@ -1,66 +1,20 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { IntegrationsService } from '../integrations/integrations.service';
+import { AiService } from '../ai/ai.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 export declare class SubmissionsService {
     private prisma;
     private integrationsService;
-    constructor(prisma: PrismaService, integrationsService: IntegrationsService);
-    create(formId: string, createSubmissionDto: CreateSubmissionDto): Promise<{
-        answers: ({
-            file: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                filename: string;
-                mimetype: string;
-                size: number;
-                path: string;
-                answerId: string;
-            } | null;
-        } & {
-            value: import("@prisma/client/runtime/library").JsonValue;
-            id: string;
-            fieldId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            submissionId: string;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        formId: string;
-    }>;
+    private aiService;
+    constructor(prisma: PrismaService, integrationsService: IntegrationsService, aiService: AiService);
+    create(formId: string, createSubmissionDto: CreateSubmissionDto): Promise<any>;
     findByFormId(formId: string, userId: string): Promise<{
         form: {
-            id: string;
-            title: string;
-            fields: import("@prisma/client/runtime/library").JsonValue;
+            id: any;
+            title: any;
+            fields: any;
         };
-        submissions: {
-            answers: {
-                file: {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    filename: string;
-                    mimetype: string;
-                    size: number;
-                    path: string;
-                    answerId: string;
-                } | null;
-                value: import("@prisma/client/runtime/library").JsonValue;
-                id: string;
-                fieldId: string;
-                createdAt: Date;
-                updatedAt: Date;
-                submissionId: string;
-            }[];
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            formId: string;
-        }[];
+        submissions: any;
     }>;
     getAnalyticsByFormId(formId: string, userId: string, dateRange?: {
         from: string;
@@ -113,36 +67,18 @@ export declare class SubmissionsService {
             submissions: number;
         };
     }>;
-    private _calculateNumericStats;
-    findOne(submissionId: string, userId: string): Promise<{
-        form: {
-            title: string;
-            fields: import("@prisma/client/runtime/library").JsonValue;
-            userId: string | null;
-        };
-        answers: ({
-            file: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                filename: string;
-                mimetype: string;
-                size: number;
-                path: string;
-                answerId: string;
-            } | null;
-        } & {
-            value: import("@prisma/client/runtime/library").JsonValue;
-            id: string;
-            fieldId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            submissionId: string;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
+    getAiAnalyticsSummary(formId: string, userId: string, dateRange?: {
+        from: string;
+        to: string;
+    }): Promise<{
+        summary: string;
+        generatedAt: string;
         formId: string;
+        dateRange: {
+            from: string;
+            to: string;
+        } | undefined;
     }>;
+    private _calculateNumericStats;
+    findOne(submissionId: string, userId: string): Promise<any>;
 }

@@ -4,66 +4,18 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 export declare class SubmissionsController {
     private readonly submissionsService;
     constructor(submissionsService: SubmissionsService);
-    create(formId: string, createSubmissionDto: CreateSubmissionDto): Promise<{
-        answers: ({
-            file: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                filename: string;
-                mimetype: string;
-                size: number;
-                path: string;
-                answerId: string;
-            } | null;
-        } & {
-            value: import("@prisma/client/runtime/library").JsonValue;
-            id: string;
-            fieldId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            submissionId: string;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        formId: string;
-    }>;
+    create(formId: string, createSubmissionDto: CreateSubmissionDto): Promise<any>;
     findByFormId(formId: string, req: {
         user: {
             uid: string;
         };
     }): Promise<{
         form: {
-            id: string;
-            title: string;
-            fields: import("@prisma/client/runtime/library").JsonValue;
+            id: any;
+            title: any;
+            fields: any;
         };
-        submissions: {
-            answers: {
-                file: {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    filename: string;
-                    mimetype: string;
-                    size: number;
-                    path: string;
-                    answerId: string;
-                } | null;
-                value: import("@prisma/client/runtime/library").JsonValue;
-                id: string;
-                fieldId: string;
-                createdAt: Date;
-                updatedAt: Date;
-                submissionId: string;
-            }[];
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            formId: string;
-        }[];
+        submissions: any;
     }>;
     getAnalytics(formId: string, user: DecodedIdToken, from?: string, to?: string): Promise<{
         submissionTrend: {
@@ -113,39 +65,18 @@ export declare class SubmissionsController {
             submissions: number;
         };
     }>;
+    getAiAnalyticsSummary(formId: string, user: DecodedIdToken, from?: string, to?: string): Promise<{
+        summary: string;
+        generatedAt: string;
+        formId: string;
+        dateRange: {
+            from: string;
+            to: string;
+        } | undefined;
+    }>;
     findOne(submissionId: string, req: {
         user: {
             uid: string;
         };
-    }): Promise<{
-        form: {
-            title: string;
-            fields: import("@prisma/client/runtime/library").JsonValue;
-            userId: string | null;
-        };
-        answers: ({
-            file: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                filename: string;
-                mimetype: string;
-                size: number;
-                path: string;
-                answerId: string;
-            } | null;
-        } & {
-            value: import("@prisma/client/runtime/library").JsonValue;
-            id: string;
-            fieldId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            submissionId: string;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        formId: string;
-    }>;
+    }): Promise<any>;
 }

@@ -38,57 +38,69 @@ interface Form {
   };
 }
 
-const NumberSlider = ({
-  field,
-  value,
-  onChange,
-  theme
-}: {
-  field: FormFieldType;
-  value: number | undefined;
-  onChange: (value: number) => void;
+const NumberSlider = ({ 
+  value, 
+  onChange, 
+  min, 
+  max, 
+  theme 
+}: { 
+  value: number; 
+  onChange: (value: number) => void; 
+  min: number; 
+  max: number; 
   theme: Theme;
 }) => {
-  const min = 1;
-  const max = 10;
-
-  const handleChange = (newValue: number) => {
-    onChange(newValue);
-  };
-
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between text-sm" style={{ color: theme.answerTextColor }}>
-        <span>{min}</span>
-        <span>{max}</span>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center text-sm text-gray-500">
+        <span className="px-3 py-1 bg-gray-100 rounded-full font-medium">{min}</span>
+        <span className="px-3 py-1 bg-gray-100 rounded-full font-medium">{max}</span>
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value || min}
-        onChange={(e) => handleChange(parseInt(e.target.value))}
-        className="w-full h-3 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2"
-        style={{
-          background: `linear-gradient(to right, ${theme.primaryColor} 0%, ${theme.primaryColor} ${((value || min) - min) / (max - min) * 100}%, ${theme.borderColor} ${((value || min) - min) / (max - min) * 100}%, ${theme.borderColor} 100%)`,
-          '--tw-ring-color': theme.primaryColor,
-        } as React.CSSProperties}
-        aria-label={field.label}
-        aria-valuemin={min}
-        aria-valuemax={max}
-        aria-valuenow={value || min}
-      />
+      <div className="relative">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value || min}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+          style={{
+            background: `linear-gradient(to right, ${theme.primaryColor} 0%, ${theme.primaryColor} ${((value - min) / (max - min)) * 100}%, #e5e7eb ${((value - min) / (max - min)) * 100}%, #e5e7eb 100%)`,
+          }}
+        />
+        <style jsx>{`
+          .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: ${theme.primaryColor};
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          }
+          .slider::-moz-range-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: ${theme.primaryColor};
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          }
+        `}</style>
+      </div>
       <div className="text-center">
-        <span
-          className="inline-block px-4 py-2 rounded-full text-lg font-semibold"
+        <div
+          className="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-2xl font-bold shadow-lg"
           style={{
             backgroundColor: theme.primaryColor,
             color: theme.buttonTextColor,
-            boxShadow: `0 4px 12px ${theme.primaryColor}40`,
           }}
         >
           {value || min}
-        </span>
+        </div>
       </div>
     </div>
   );
@@ -132,13 +144,32 @@ const FormHeader = ({ form, theme }: { form: Form; theme: Theme }) => {
 
   const SelectedIcon = form.formSettings?.titleIcon ? iconMap[form.formSettings.titleIcon as keyof typeof iconMap] : null;
 
+  // Function to convert Unsplash URLs to properly formatted URLs
+  const getUnsplashImageUrl = (url: string) => {
+    // Check if it's already a proper Unsplash URL
+    if (url.startsWith('https://images.unsplash.com/')) {
+      return url;
+    }
+    
+    // Handle unsplash.com URLs
+    if (url.includes('unsplash.com/photos/')) {
+      const photoId = url.split('/photos/')[1]?.split('?')[0];
+      if (photoId) {
+        return `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=1200&q=80`;
+      }
+    }
+    
+    // Return original URL if no conversion needed
+    return url;
+  };
+
   return (
-    <div className="mb-6 sm:mb-8">
+    <div className="space-y-8">
       {/* Cover Image */}
       {form.formSettings?.coverImage && (
-        <div className="relative w-full h-48 mb-6 -mx-8 -mt-8 rounded-t-lg overflow-hidden">
+        <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg">
           <img
-            src={form.formSettings.coverImage}
+            src={getUnsplashImageUrl(form.formSettings.coverImage)}
             alt="Form cover"
             className="w-full h-full object-cover"
             crossOrigin="anonymous"
@@ -147,29 +178,50 @@ const FormHeader = ({ form, theme }: { form: Form; theme: Theme }) => {
             }}
             onError={(e) => {
               console.error('Cover image failed to load:', form.formSettings?.coverImage);
-              e.currentTarget.style.display = 'none';
+              // Create a gradient fallback
+              const fallbackDiv = document.createElement('div');
+              fallbackDiv.className = 'w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500';
+              e.currentTarget.parentNode?.replaceChild(fallbackDiv, e.currentTarget);
             }}
           />
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
         </div>
       )}
 
-      {/* Title with Icon */}
-      <div className="text-center">
+      {/* Title and Description */}
+      <div className="text-center space-y-6">
         {SelectedIcon && (
-          <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-opacity-10 border-2 border-opacity-20 mb-4" style={{ backgroundColor: `${theme.primaryColor}20`, borderColor: `${theme.primaryColor}40` }}>
-              <SelectedIcon className="h-8 w-8" style={{ color: theme.primaryColor }} />
+          <div className="flex justify-center">
+            <div 
+              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl shadow-lg"
+              style={{ 
+                backgroundColor: `${theme.primaryColor}15`,
+                border: `2px solid ${theme.primaryColor}25`
+              }}
+            >
+              <SelectedIcon className="h-10 w-10" style={{ color: theme.primaryColor }} />
             </div>
           </div>
         )}
-        <h1 
-          id="form-title"
-          style={{color: theme.questionTextColor}} 
-          className="text-2xl sm:text-3xl font-bold"
-        >
-          {form.title}
-        </h1>
+        
+        <div className="space-y-4">
+          <h1 
+            id="form-title"
+            style={{color: theme.questionTextColor}} 
+            className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight"
+          >
+            {form.title}
+          </h1>
+          
+          {(form as any).description && (
+            <p 
+              className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
+              style={{color: theme.textColor + '80'}}
+            >
+              {(form as any).description}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -179,19 +231,22 @@ const FieldLabel = ({ field, theme }: {
   field: FormFieldType; 
   theme: Theme; 
 }) => (
-  <div className="flex items-center justify-between">
-    <div className="flex items-center">
-      <Label 
-        style={{color: theme.questionTextColor}} 
-        className="text-lg font-medium block" 
-        htmlFor={field.id}
-      >
-        {field.label}
-        {field.validation?.required && (
-          <span className="text-red-500 ml-1" aria-label="required">*</span>
-        )}
-      </Label>
-    </div>
+  <div className="space-y-2">
+    <Label 
+      style={{color: theme.questionTextColor}} 
+      className="text-xl font-semibold block leading-tight" 
+      htmlFor={field.id}
+    >
+      {field.label}
+      {field.validation?.required && (
+        <span className="text-red-500 ml-1" aria-label="required">*</span>
+      )}
+    </Label>
+    {field.description && (
+      <p className="text-base text-gray-600 leading-relaxed" style={{color: theme.textColor + '70'}}>
+        {field.description}
+      </p>
+    )}
   </div>
 );
 
@@ -228,7 +283,12 @@ const renderField = (
     color: theme.answerTextColor,
     borderColor: theme.borderColor,
     '--tw-ring-color': theme.primaryColor,
+    fontSize: '16px',
+    lineHeight: '1.5',
   } as React.CSSProperties;
+
+  const inputClassName = "text-lg py-4 px-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-400";
+  const textareaClassName = "text-lg py-4 px-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-400 min-h-[120px] resize-y";
 
   const value = answers[field.id]?.value;
   const error = errors[field.id];
@@ -253,7 +313,7 @@ const renderField = (
             placeholder={placeholder}
             value={value || ''}
             onChange={(e) => handleValueChange(e.target.value)}
-            className={cn(error && "border-red-300 focus:border-red-500")}
+            className={cn(inputClassName, error && "border-red-300 focus:border-red-500 focus:ring-red-100")}
             aria-invalid={!!error}
             aria-describedby={error ? `${field.id}-error` : undefined}
           />
@@ -269,7 +329,7 @@ const renderField = (
             placeholder={placeholder}
             value={value || ''}
             onChange={(e) => handleValueChange(e.target.value)}
-            className={cn("min-h-[100px] resize-y", error && "border-red-300 focus:border-red-500")}
+            className={cn(textareaClassName, error && "border-red-300 focus:border-red-500 focus:ring-red-100")}
             aria-invalid={!!error}
             aria-describedby={error ? `${field.id}-error` : undefined}
           />
@@ -286,7 +346,7 @@ const renderField = (
             placeholder={placeholder}
             value={value || ''}
             onChange={(e) => handleValueChange(e.target.value)}
-            className={cn(error && "border-red-300 focus:border-red-500")}
+            className={cn(inputClassName, error && "border-red-300 focus:border-red-500 focus:ring-red-100")}
             aria-invalid={!!error}
             aria-describedby={error ? `${field.id}-error` : undefined}
           />
@@ -305,9 +365,10 @@ const renderField = (
         return (
           <div>
             <NumberSlider
-              field={field}
-              value={value}
+              value={value || 1}
               onChange={handleValueChange}
+              min={1}
+              max={field.validation?.max || 10}
               theme={theme}
             />
             <ValidationFeedback
@@ -336,14 +397,14 @@ const renderField = (
     case 'RadioGroup':
         return (
             <div>
-                <RadioGroup value={value} onValueChange={handleValueChange} className="space-y-3">
+                <RadioGroup value={value} onValueChange={handleValueChange} className="space-y-4">
                     {field.options?.map((option, index) => {
                         const optionValue = typeof option === 'object' ? option.value : option;
                         const optionLabel = typeof option === 'object' ? option.label : option;
                         return (
-                            <div key={index} className="flex items-center space-x-3">
-                                <RadioGroupItem value={optionValue} id={`${field.id}-${index}`} />
-                                <Label htmlFor={`${field.id}-${index}`}>{optionLabel}</Label>
+                            <div key={index} className="flex items-center space-x-4 p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-colors duration-200">
+                                <RadioGroupItem value={optionValue} id={`${field.id}-${index}`} className="w-5 h-5" />
+                                <Label htmlFor={`${field.id}-${index}`} className="text-lg cursor-pointer flex-1">{optionLabel}</Label>
                             </div>
                         );
                     })}
@@ -356,15 +417,18 @@ const renderField = (
       return (
         <div>
           <Select value={value} onValueChange={handleValueChange}>
-            <SelectTrigger style={inputStyle} className={cn(error && "border-red-300 focus:border-red-500")}>
+            <SelectTrigger 
+              style={inputStyle} 
+              className={cn("text-lg py-4 px-4 h-auto rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200", error && "border-red-300 focus:border-red-500 focus:ring-red-100")}
+            >
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-2 border-gray-200 shadow-lg">
               {field.options?.map((option, index) => {
                 const optionValue = typeof option === 'object' ? option.value : option;
                 const optionLabel = typeof option === 'object' ? option.label : option;
                 return (
-                  <SelectItem key={index} value={optionValue}>{optionLabel}</SelectItem>
+                  <SelectItem key={index} value={optionValue} className="text-lg py-3 px-4 hover:bg-gray-50">{optionLabel}</SelectItem>
                 );
               })}
             </SelectContent>
@@ -375,7 +439,7 @@ const renderField = (
 
     case 'Checkbox':
         return (
-            <div>
+            <div className="space-y-4">
                 {field.options?.map((option, index) => {
                     const optionValue = typeof option === 'object' ? option.value : option;
                     const optionLabel = typeof option === 'object' ? option.label : option;
@@ -390,9 +454,9 @@ const renderField = (
                     }
 
                     return (
-                        <div key={index} className="flex items-center space-x-2">
-                            <Checkbox id={`${field.id}-${index}`} checked={isChecked} onCheckedChange={onCheckedChange} />
-                            <Label htmlFor={`${field.id}-${index}`}>{optionLabel}</Label>
+                        <div key={index} className="flex items-center space-x-4 p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-colors duration-200">
+                            <Checkbox id={`${field.id}-${index}`} checked={isChecked} onCheckedChange={onCheckedChange} className="w-5 h-5" />
+                            <Label htmlFor={`${field.id}-${index}`} className="text-lg cursor-pointer flex-1">{optionLabel}</Label>
                         </div>
                     )
                 })}
@@ -437,7 +501,8 @@ const renderField = (
 };
 
 export default function SubmissionPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const [form, setForm] = useState<Form | null>(null);
   const [answers, setAnswers] = useState<any>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -556,48 +621,83 @@ export default function SubmissionPage() {
 
   return (
     <div 
-      className="min-h-screen w-full flex flex-col items-center justify-center p-4"
-      style={{ backgroundColor: theme.backgroundColor, color: theme.textColor }}
+      className="min-h-screen w-full"
+      style={{ backgroundColor: theme.backgroundColor }}
     >
-      <main className="w-full max-w-2xl">
-        <div 
-          className="p-8 rounded-lg shadow-xl border"
-          style={{
-            backgroundColor: theme.formBackgroundColor,
-            borderColor: theme.borderColor,
-            borderWidth: `${theme.borderWidth}px`,
-            borderRadius: `${theme.borderRadius}px`,
-            fontFamily: theme.fontFamily,
-          }}
-        >
+      {/* Header with FormEz branding */}
+      <div className="w-full bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">F</span>
+            </div>
+            <span className="font-semibold text-gray-900">FormEz</span>
+          </div>
+          <div className="text-sm text-gray-500">
+            Secure form submission
+          </div>
+        </div>
+      </div>
+
+      <main className="max-w-3xl mx-auto px-6 py-12">
+        <div className="space-y-8">
           <FormHeader form={form} theme={theme} />
           
-          <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-            {visibleFields.map((field) => (
-              <div key={field.id} className="space-y-2">
-                <FieldLabel field={field} theme={theme} />
-                {renderField(field, answers, setAnswers, theme, errors, setErrors)}
+          <div 
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+            style={{ fontFamily: theme.fontFamily }}
+          >
+            <form onSubmit={handleSubmit} className="divide-y divide-gray-50" noValidate>
+              {visibleFields.map((field, index) => (
+                <div key={field.id} className="p-8 hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600 mt-1">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      <FieldLabel field={field} theme={theme} />
+                      <div className="max-w-xl">
+                        {renderField(field, answers, setAnswers, theme, errors, setErrors)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="p-8 bg-gray-50/50">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    {visibleFields.length} {visibleFields.length === 1 ? 'question' : 'questions'}
+                  </div>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="px-8 py-3 text-base font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                    style={{
+                      backgroundColor: theme.primaryColor,
+                      color: theme.buttonTextColor,
+                    }}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </div>
+                    ) : (
+                      'Submit form'
+                    )}
+                  </Button>
+                </div>
               </div>
-            ))}
-            
-            <div className="pt-4">
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full text-lg py-6"
-                style={{
-                  backgroundColor: theme.primaryColor,
-                  color: theme.buttonTextColor,
-                }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
         
-        <footer className="text-center mt-8 text-sm text-muted-foreground/60">
-          Powered by FormEz
+        <footer className="text-center mt-12 text-sm text-gray-400">
+          <div className="flex items-center justify-center space-x-1">
+            <span>Powered by</span>
+            <span className="font-medium text-gray-600">FormEz</span>
+          </div>
         </footer>
       </main>
     </div>
