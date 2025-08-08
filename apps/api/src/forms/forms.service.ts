@@ -13,28 +13,30 @@ export class FormsService {
   ) {}
 
   async create(createFormDto: CreateFormDto, userId: string) {
-    // For Firebase users, we need to provide at least an email
-    // This is a temporary fix - in a real app, you'd get user details from Firebase token
+    // Ensure user exists using Firebase UID (no googleId needed)
     await this.prisma.user.upsert({
-      where: { id: userId },
+      where: { id: userId }, // Firebase UID from your script
       update: {},
       create: {
-        id: userId,
-        email: `${userId}@firebase.temp`, // Temporary email for Firebase users
+        id: userId, // Same Firebase UID: '2Vd6R7HTykRdqbNxzwouaeNcXPv1'
+        email: `${userId}@firebase.user`, // Generate a unique email for Firebase users
       },
     });
 
-    return this.prisma.form.create({
+    // Continue with form creation...
+    const form = await this.prisma.form.create({
       data: {
         title: createFormDto.title,
-        fields: (createFormDto.fields as unknown as Prisma.JsonArray) || [],
+        fields: createFormDto.fields as unknown as Prisma.JsonArray,
         theme: (createFormDto.theme as Prisma.JsonObject) || {},
+        formSettings: (createFormDto.formSettings as Prisma.JsonObject) || {},
         postSubmissionSettings:
-          (createFormDto.postSubmissionSettings as Prisma.JsonObject) ||
-          undefined,
-        userId,
+          (createFormDto.postSubmissionSettings as Prisma.JsonObject) || {},
+        userId, // Firebase UID
       },
     });
+
+    return form;
   }
 
   async logFormView(formId: string) {
