@@ -301,9 +301,9 @@ export class SubmissionsService {
         const counts = new Map<string, number>();
         field.options?.forEach((option) => {
           // Handle both string options and object options with value/label
-          const optionValue =
-            typeof option === 'string' ? option : option.value;
-          counts.set(optionValue, 0);
+          const optionKey =
+            typeof option === 'string' ? option : JSON.stringify(option);
+          counts.set(optionKey, 0);
         });
         choiceFieldAnalytics.set(field.id, counts);
       } else if (['Input', 'Textarea', 'Email'].includes(field.type)) {
@@ -328,12 +328,29 @@ export class SubmissionsService {
 
         if (choiceFieldAnalytics.has(field.id)) {
           const answerValues = Array.isArray(answer.value)
-            ? (answer.value as string[])
-            : [answer.value as string];
+            ? (answer.value as any[])
+            : [answer.value];
+          
           const counts = choiceFieldAnalytics.get(field.id)!;
-          answerValues.forEach((value) => {
-            if (counts.has(value)) {
-              counts.set(value, counts.get(value)! + 1);
+          
+          answerValues.forEach((submittedValue: any) => {
+            // Find matching option by either value or label
+            const matchingOption = field.options?.find((opt: any) => {
+              if (typeof opt === 'string') {
+                return opt === submittedValue;
+              } else {
+                return opt.value === submittedValue || opt.label === submittedValue;
+              }
+            });
+            
+            if (matchingOption) {
+              const optionKey = typeof matchingOption === 'string' 
+                ? matchingOption 
+                : JSON.stringify(matchingOption);
+              
+              if (counts.has(optionKey)) {
+                counts.set(optionKey, counts.get(optionKey)! + 1);
+              }
             }
           });
         } else if (
@@ -365,10 +382,19 @@ export class SubmissionsService {
         fieldId,
         label: fieldMap.get(fieldId)!.label,
         type: fieldMap.get(fieldId)!.type,
-        options: Array.from(counts.entries()).map(([option, count]) => ({
-          option,
-          count,
-        })),
+        options: Array.from(counts.entries()).map(([optionKey, count]) => {
+          try {
+            // Try to parse the option string back into an object
+            const parsedOption = JSON.parse(optionKey);
+            return { 
+              option: parsedOption.label || parsedOption.value || parsedOption, 
+              count 
+            };
+          } catch (e) {
+            // If it fails, it's a plain string
+            return { option: optionKey, count };
+          }
+        }),
       }),
     );
 

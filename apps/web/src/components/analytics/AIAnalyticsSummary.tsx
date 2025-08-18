@@ -81,14 +81,18 @@ export const AIAnalyticsSummary: React.FC<AIAnalyticsSummaryProps> = ({ formId, 
     const regex = new RegExp(`${sectionTitle}:\\s*([\\s\\S]*?)(?=\\n\\n[A-Z][^:]*:|$)`, 'i');
     const match = text.match(regex);
     if (match && match[1]) {
-      // Clean any remaining markdown formatting
-      return match[1]
+      // Clean any remaining markdown formatting and preserve bullet point structure
+      const cleaned = match[1]
         .trim()
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
         .replace(/\*(.*?)\*/g, '$1')     // Remove italic
-        .replace(/^\d+\.\s*/gm, '')      // Remove numbered lists
         .replace(/\*\*/g, '')            // Remove any remaining **
-        .replace(/\n{3,}/g, '\n\n');     // Clean extra whitespace
+        .replace(/\n{3,}/g, '\n\n')      // Clean extra whitespace
+        .replace(/^\* /gm, '- ')         // Convert asterisk bullets to dashes
+        .replace(/^• /gm, '- ');         // Convert bullet symbols to dashes
+      
+      // Return full content with proper bullet point formatting
+      return cleaned;
     }
     return null;
   };
@@ -96,13 +100,32 @@ export const AIAnalyticsSummary: React.FC<AIAnalyticsSummaryProps> = ({ formId, 
   const renderAnalysisSection = (title: string, content: string | null, icon: React.ReactNode) => {
     if (!content) return null;
     
+    // Split content into lines and render bullet points properly
+    const lines = content.split('\n').filter(line => line.trim());
+    
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           {icon}
           <h4 className="font-semibold text-sm">{title}</h4>
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">{content}</p>
+        <div className="text-sm text-muted-foreground leading-relaxed space-y-1">
+          {lines.map((line, index) => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('- ')) {
+              // Render as bullet point
+              return (
+                <div key={index} className="flex items-start gap-2">
+                  <span className="text-muted-foreground mt-1">•</span>
+                  <span>{trimmedLine.substring(2)}</span>
+                </div>
+              );
+            } else {
+              // Render as regular text
+              return <p key={index}>{trimmedLine}</p>;
+            }
+          })}
+        </div>
       </div>
     );
   };

@@ -349,7 +349,7 @@ export class AiService {
         0,
       ) / Math.max(recentTrend.length, 1);
 
-    return `You are an expert data analyst and user experience researcher. Analyze the following form analytics data and provide a comprehensive summary with insights and sentiment analysis.
+    return `You are an expert data analyst. Analyze the following form analytics data and provide a CONCISE summary with key insights.
 
 Form Information:
 - Title: "${formTitle}"
@@ -375,30 +375,29 @@ Submission Trends:
         : 'N/A'
     }
 
-Please provide a comprehensive analysis that includes the following sections. For each section, start with the section name followed by a colon, then provide the analysis in clear, professional language:
+Please provide analysis for each section using bullet point format for better readability. Start each section with the section name followed by a colon:
 
-1. Overall Performance Summary: How is the form performing in terms of engagement and completion?
+1. Overall Performance Summary: Use 2-3 bullet points focusing on key performance metrics only.
 
-2. Statistical Insights: Key metrics and what they indicate about user behavior.
+2. Statistical Insights: Use 2-3 bullet points highlighting the most important numbers and what they mean.
 
-3. User Sentiment Analysis: Based on the response patterns and text analysis, what can you infer about user sentiment and satisfaction?
+3. User Sentiment Analysis: Use 4-5 bullet points covering sentiment patterns and engagement indicators.
 
-4. Response Pattern Analysis: What do the choice field responses tell us about user preferences and behavior?
+4. Response Pattern Analysis: Use 2-3 bullet points covering the main user choice patterns and behaviors.
 
-5. Recommendations: Specific actionable suggestions to improve form performance, user experience, or data collection.
+5. Recommendations: Use 4-5 bullet points with specific, actionable improvements and expected impact.
 
-6. Trends and Patterns: What temporal patterns or behavioral insights can you identify?
+6. Trends and Patterns: Use 4-5 bullet points covering behavioral insights and patterns from the data.
 
 IMPORTANT FORMATTING RULES:
 - Use PLAIN TEXT only - no markdown formatting
-- Do NOT use asterisks (*) or any other markdown symbols
-- Do NOT use bold (**text**) or italic (*text*) formatting
-- Simply write section names followed by a colon
-- Write in clear, professional language as if presenting to a business stakeholder
-- Focus on actionable insights and avoid overly technical jargon
-- If data is limited, acknowledge this and suggest ways to gather more meaningful insights
-- Use simple paragraph breaks for readability
+- Use simple dashes (-) for bullet points, not asterisks
+- Each bullet point should be one clear, complete thought
+- Write section names followed by a colon
+- Start each bullet point on a new line with "- " 
+- Use clear, professional language
+- Skip sections if data is insufficient
 
-Return the analysis as clean plain text without any formatting symbols.`;
+Return a concise analysis as clean plain text.`;
   }
 }

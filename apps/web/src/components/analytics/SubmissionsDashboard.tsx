@@ -1294,12 +1294,7 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                     <Pie
                       key={`pie-${field.fieldId}-${animationKey}`}
                       data={{
-                        labels: field.options.map(o => {
-                          if (typeof o.option === 'object' && o.option !== null) {
-                            return (o.option as any).label || (o.option as any).value || '[Object]';
-                          }
-                          return o.option;
-                        }),
+                        labels: field.options.map(o => String(o.option)),
                         datasets: [{
                           data: field.options.map(o => o.count),
                           backgroundColor: [
@@ -1369,12 +1364,7 @@ export const SubmissionsDashboard = forwardRef<SubmissionsDashboardHandle, { for
                     <Bar
                       key={`checkbox-bar-${field.fieldId}-${animationKey}`}
                       data={{
-                        labels: field.options.map(o => {
-                          if (typeof o.option === 'object' && o.option !== null) {
-                            return String((o.option as any).label || (o.option as any).value || '[Object]');
-                          }
-                          return String(o.option);
-                        }),
+                        labels: field.options.map(o => String(o.option)),
                         datasets: [{
                           label: 'Times Chosen',
                           data: field.options.map(o => o.count),
