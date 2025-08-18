@@ -257,7 +257,7 @@ export function Canvas({ id, formTitle = 'Untitled Form' }: CanvasProps) {
     <div
       id={id}
       ref={setNodeRef}
-      style={{ backgroundColor: '#fafafa', fontFamily: theme.fontFamily }}
+      style={{ backgroundColor: theme.backgroundColor, fontFamily: theme.fontFamily }}
       className={cn(
         "min-h-full flex justify-center items-start transition-all duration-200",
         isOver && "bg-primary/5"
@@ -269,7 +269,7 @@ export function Canvas({ id, formTitle = 'Untitled Form' }: CanvasProps) {
           isOver && "scale-[1.005]"
         )}
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: theme.formBackgroundColor,
           borderRadius: '0',
           fontFamily: theme.fontFamily,
           minHeight: '100vh'

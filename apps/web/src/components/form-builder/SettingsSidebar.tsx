@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-// import { ThemeSettings } from './ThemeSettings';
 import { SettingsTabs } from './SettingsTabs';
 import { FormHeaderSettings } from './FormHeaderSettings';
 import { useFormStore } from '@/store/form';
-import { Eye, Brush, Settings, Send, Image, Shield } from 'lucide-react';
+import { Eye, Settings, Send, Image, Shield } from 'lucide-react';
 import { PostSubmissionSettings } from './PostSubmissionSettings';
 import { AccessConditionsSettings } from './AccessConditionsSettings';
 
@@ -26,12 +25,12 @@ function NoFieldSelected() {
 
 export function SettingsSidebar() {
   const { fields, selectedFieldId, setSelectedFieldId } = useFormStore();
-  const [view, setView] = useState<'field' | 'header' | 'theme' | 'post-submission' | 'access'>('field');
+  const [view, setView] = useState<'field' | 'header' | 'post-submission' | 'access'>('field');
 
   const selectedField = fields.find((f) => f.id === selectedFieldId);
 
   // If a field is selected, always show field settings
-  // If not, show the last active view (header, theme or post-submission)
+  // If not, show the last active view (header or post-submission)
   const currentView = selectedFieldId ? 'field' : view;
 
   return (
@@ -46,7 +45,6 @@ export function SettingsSidebar() {
              <NoFieldSelected />
           )}
           {currentView === 'header' && <FormHeaderSettings />}
-          {/* {currentView === 'theme' && <ThemeSettings />} */}
           {currentView === 'access' && <AccessConditionsSettings />}
           {currentView === 'post-submission' && <PostSubmissionSettings />}
         </div>
@@ -90,18 +88,6 @@ export function SettingsSidebar() {
           <Shield className="h-4 w-4 mb-1" />
           <span className="text-xs font-medium">Access</span>
         </button>
-        
-        {/* <button
-          onClick={() => {
-            setView('theme');
-            setSelectedFieldId(null);
-          }}
-          className={`flex-1 flex flex-col items-center justify-center py-2 rounded-md ${currentView === 'theme' ? 'text-primary bg-muted' : 'text-muted-foreground hover:bg-muted/50'}`}
-          title="Theme"
-        >
-          <Brush className="h-5 w-5 mb-1" />
-           <span className="text-xs font-medium">Theme</span>
-        </button> */}
         
         <button
           onClick={() => {

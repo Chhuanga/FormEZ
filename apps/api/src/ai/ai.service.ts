@@ -48,17 +48,29 @@ export class AiService {
       let text = response.text();
 
       // Try to extract JSON object or array from the response
+      // First, try to extract complete arrays or objects
       const jsonObjectMatch = text.match(/\{[\s\S]*\}/s);
       const jsonArrayMatch = text.match(/\[[\s\S]*\]/s);
       
-      if (jsonObjectMatch && jsonObjectMatch[0]) {
-        text = jsonObjectMatch[0];
-      } else if (jsonArrayMatch && jsonArrayMatch[0]) {
+      if (jsonArrayMatch && jsonArrayMatch[0]) {
         text = jsonArrayMatch[0];
+      } else if (jsonObjectMatch && jsonObjectMatch[0]) {
+        text = jsonObjectMatch[0];
       } else {
+        // Check for markdown JSON blocks
         const markdownMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
         if (markdownMatch && markdownMatch[1]) {
-          text = markdownMatch[1];
+          text = markdownMatch[1].trim();
+        } else {
+          // Try to fix malformed JSON arrays (missing brackets)
+          // Look for multiple JSON objects separated by commas
+          const multipleObjectsMatch = text.match(
+            /\{\s*"[\s\S]*\}\s*,[\s\S]*\{\s*"[\s\S]*\}/,
+          );
+          if (multipleObjectsMatch) {
+            // Wrap in array brackets if missing
+            text = `[${text.trim()}]`;
+          }
         }
       }
       return text;
@@ -87,7 +99,7 @@ export class AiService {
   private getRefinementPrompt(userPrompt: string): string {
     return `You are a form expert. A user has provided a prompt to create a form. Your first job is to determine if the prompt is too vague. A prompt is vague if it lacks a clear purpose or target audience (e.g., "make a form", "a feedback form"). A prompt is specific if it includes context (e.g., "a feedback form for my coffee shop", "a registration form for a webinar").
 
-    If the prompt is specific enough, respond with an empty JSON array: [].
+    If the prompt is specific enough, respond with exactly this: []
 
     If the prompt is vague, generate a JSON array of 2-3 clarifying questions to help the user. Each question should be an object with an "id" (a machine-friendly string) and a "question" (a user-friendly string).
 
@@ -97,7 +109,7 @@ export class AiService {
 
     User prompt: "${userPrompt}"
 
-    Output only the raw JSON array.`;
+    IMPORTANT: Output ONLY a valid JSON array. Start with [ and end with ]. Do not include any text before or after the JSON.`;
   }
 
   private getFormGenerationPrompt(dto: GenerateFormWithAiDto): string {
@@ -151,7 +163,7 @@ export class AiService {
     Clarifying Answers:
     ${answersPart}
 
-    Output only the raw JSON object with title and fields.`;
+    IMPORTANT: Output ONLY a valid JSON object. Start with { and end with }. Do not include any text before or after the JSON.`;
   }
 
   private async generateForm(dto: GenerateFormWithAiDto, user: DecodedIdToken) {
@@ -223,12 +235,35 @@ export class AiService {
       const rawResponse = await this.callGemini(refinementPrompt);
 
       try {
-        const questions = JSON.parse(rawResponse) as RefinementQuestion[];
-        if (Array.isArray(questions) && questions.length === 0) {
+        let parsedQuestions;
+        try {
+          parsedQuestions = JSON.parse(rawResponse) as RefinementQuestion[];
+        } catch (initialParseError) {
+          // Try to fix malformed JSON by wrapping in array brackets if needed
+          const fixedResponse = rawResponse.trim().startsWith('[')
+            ? rawResponse
+            : `[${rawResponse}]`;
+          
+          try {
+            parsedQuestions = JSON.parse(fixedResponse) as RefinementQuestion[];
+          } catch (secondParseError) {
+            // Log the raw response for debugging
+            console.error(
+              'Failed to parse refinement response as JSON after fixing:',
+              rawResponse,
+              initialParseError,
+            );
+            throw new InternalServerErrorException(
+              'AI failed to process the request. Please try again.',
+            );
+          }
+        }
+        
+        if (Array.isArray(parsedQuestions) && parsedQuestions.length === 0) {
           // AI deemed the prompt specific enough, proceed to form generation
           return this.generateForm(dto, user);
         }
-        return { questions };
+        return { questions: parsedQuestions };
       } catch (parseError) {
         console.error(
           'Failed to parse refinement response as JSON:',

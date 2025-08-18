@@ -19,24 +19,13 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { BlockPalette } from './BlockPalette';
-import { FileText, Palette, Eye, Plus, Edit2 } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { FileText, Eye, Plus, Edit2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { FormField as FormFieldComponent } from './FormField';
 import Link from 'next/link';
 import { SettingsSidebar } from './SettingsSidebar';
 import { Badge } from '@/components/ui/badge';
+import { ThemeSelector } from './ThemeSelector';
 
 // A "tab-like" overlay for palette items
 function PaletteItemOverlay({
@@ -76,7 +65,6 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     setFields,
     theme,
     setTheme,
-    resetTheme,
     formSettings,
     setFormSettings,
     postSubmissionSettings,
@@ -319,7 +307,8 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header - Make more responsive */}
-          <header className="bg-background/80 backdrop-blur-sm border-b border-border flex-shrink-0">
+                    {/* Header - Make more responsive */}
+          <header className="bg-background/80 backdrop-blur-sm border-b border-border flex-shrink-0 relative z-[9000]">
             <div className="w-full px-3 sm:px-6 py-3">
               <div className="flex items-center justify-between gap-2">
                 {/* Left: Project Name */}
@@ -355,110 +344,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
 
                   {/* Theme Button - Hide on mobile */}
                   <div className="hidden md:block">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Palette className="h-4 w-4 mr-2" />
-                          Theme
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <div className="grid gap-4">
-                          <div className="space-y-2">
-                            <h4 className="font-medium leading-none">Theme</h4>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={resetTheme}
-                              className="h-auto p-1 text-xs absolute top-3 right-3"
-                            >
-                              Reset
-                            </Button>
-                            <p className="text-sm text-muted-foreground">
-                              Customize the look and feel of your form.
-                            </p>
-                          </div>
-                          <div className="grid gap-3">
-                            <div className="font-medium text-sm">Colors</div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <ColorPicker
-                                label="Primary"
-                                value={theme.primaryColor}
-                                onChange={(value) => setTheme({ ...theme, primaryColor: value })}
-                              />
-                              <ColorPicker
-                                label="Button Text"
-                                value={theme.buttonTextColor}
-                                onChange={(value) => setTheme({ ...theme, buttonTextColor: value })}
-                              />
-                              <ColorPicker
-                                label="Question"
-                                value={theme.questionTextColor}
-                                onChange={(value) => setTheme({ ...theme, questionTextColor: value })}
-                              />
-                              <ColorPicker
-                                label="Answer"
-                                value={theme.answerTextColor}
-                                onChange={(value) => setTheme({ ...theme, answerTextColor: value })}
-                              />
-                              <ColorPicker
-                                label="Form BG"
-                                value={theme.formBackgroundColor}
-                                onChange={(value) => setTheme({ ...theme, formBackgroundColor: value })}
-                              />
-                              <ColorPicker
-                                label="Page BG"
-                                value={theme.backgroundColor}
-                                onChange={(value) => setTheme({ ...theme, backgroundColor: value })}
-                              />
-                            </div>
-                            <div className="font-medium text-sm pt-2">Style</div>
-                            <div className="grid grid-cols-3 items-center gap-4">
-                              <Label htmlFor="fontFamily">Font</Label>
-                              <Select
-                                value={theme.fontFamily}
-                                onValueChange={(value) =>
-                                  setTheme({ ...theme, fontFamily: value })
-                                }
-                              >
-                                <SelectTrigger className="col-span-2 h-8">
-                                  <SelectValue placeholder="Select font" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Inter, sans-serif">Inter</SelectItem>
-                                  <SelectItem value="Roboto, sans-serif">Roboto</SelectItem>
-                                  <SelectItem value="Poppins, sans-serif">Poppins</SelectItem>
-                                  <SelectItem value="Georgia, serif">Georgia</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="grid grid-cols-3 items-center gap-4">
-                              <Label>Border</Label>
-                               <input
-                                 type="color"
-                                 value={theme.borderColor}
-                                 onChange={(e) => setTheme({ ...theme, borderColor: e.target.value })}
-                                 className="w-full h-8 p-0 bg-white border-none rounded-md cursor-pointer"
-                               />
-                               <UnitInput
-                                 value={theme.borderWidth}
-                                 onChange={(value) => setTheme({ ...theme, borderWidth: value })}
-                                 suffix="px"
-                               />
-                            </div>
-                            <div className="grid grid-cols-3 items-center gap-4">
-                             <Label>Radius</Label>
-                             <UnitInput
-                               value={theme.borderRadius}
-                               onChange={(value) => setTheme({ ...theme, borderRadius: value })}
-                               className="col-span-2"
-                               suffix="px"
-                             />
-                            </div>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <ThemeSelector />
                   </div>
                 </div>
 
@@ -507,42 +393,5 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
         )}
       </DragOverlay>
     </DndContext>
-  );
-}
-
-function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void; }) {
-  return (
-    <div>
-      <Label className="text-sm">{label}</Label>
-      <div className="relative h-8 mt-1">
-        <input
-          type="color"
-          value={value || '#000000'}
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-        <div
-          className="w-full h-full rounded-md border border-border"
-          style={{ backgroundColor: value || '#000000' }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function UnitInput({ value, onChange, suffix, className }: { value: number; onChange: (value: number) => void; suffix: string; className?: string; }) {
-  return (
-    <div className={`relative ${className}`}>
-      <Input
-        type="number"
-        value={value || 0}
-        onChange={(e) => onChange(e.target.valueAsNumber || 0)}
-        className="h-8 pr-8"
-     
-      />
-      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-        {suffix}
-      </span>
-    </div>
   );
 } 
