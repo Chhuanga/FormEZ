@@ -43,7 +43,7 @@ const navigationItems = [
   },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, minimal = false }: { children: React.ReactNode, minimal?: boolean }) {
   const { user } = useAuth();
   const pathname = usePathname() || '/';
   const router = useRouter();
@@ -59,10 +59,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   // For unauthenticated users, just render the children (which will be the LandingPage)
-  if (!user) {
+  if (!user || minimal) {
     return <>{children}</>;
   }
-  
+
   return (
     <div className="flex h-screen bg-gray-100">
       

@@ -8,6 +8,7 @@ import { SubmissionsModule } from './submissions/submissions.module';
 import { FilesModule } from './files/files.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AiModule } from './ai/ai.module';
+import { CollaborationModule } from './collaboration/collaboration.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AiModule } from './ai/ai.module';
     FilesModule,
     IntegrationsModule,
     AiModule,
+    CollaborationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -40,6 +40,9 @@ let FormsController = class FormsController {
     findOnePublicly(id) {
         return this.formsService.findOnePublicly(id);
     }
+    getCollaborationData(id, user) {
+        return this.formsService.findOneForCollaboration(id, user.uid);
+    }
     update(id, updateFormDto, user) {
         return this.formsService.update(id, user.uid, updateFormDto);
     }
@@ -95,6 +98,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], FormsController.prototype, "findOnePublicly", null);
+__decorate([
+    (0, common_1.Get)(':id/collaborate'),
+    (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, auth_decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], FormsController.prototype, "getCollaborationData", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, common_1.UseGuards)(firebase_guard_1.FirebaseGuard),

@@ -19,6 +19,7 @@ model User {
   forms              Form[]
   IntegrationAccount IntegrationAccount[]
   Session            Session[]
+  collaborations     FormCollaborator[]
 }
 
 model Form {
@@ -35,6 +36,7 @@ model Form {
   submissions            FormSubmission[]
   views                  FormView[]
   integrations           Integration[]
+  collaborators          FormCollaborator[]
 }
 
 model FormView {
@@ -138,4 +140,18 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model FormCollaborator {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  formId    String
+  userId    String
+  role      String   @default("editor") // "owner" or "editor"
+  
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([formId, userId])
 }

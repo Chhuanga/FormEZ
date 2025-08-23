@@ -55,6 +55,12 @@ export class FormsController {
     return this.formsService.findOnePublicly(id);
   }
 
+  @Get(':id/collaborate')
+  @UseGuards(FirebaseGuard)
+  getCollaborationData(@Param('id') id: string, @CurrentUser() user: DecodedIdToken) {
+    return this.formsService.findOneForCollaboration(id, user.uid);
+  }
+
   @Patch(':id')
   @UseGuards(FirebaseGuard)
   update(

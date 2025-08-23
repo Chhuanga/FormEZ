@@ -1,7 +1,6 @@
 import { FormsService } from '../forms/forms.service';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { GenerateFormWithAiDto } from './dto/generate-form-with-ai.dto';
-import { RefinementQuestion } from './dto/refinement-question.dto';
 export declare class AiService {
     private readonly formsService;
     private genAI;
@@ -24,7 +23,7 @@ export declare class AiService {
             userId: string | null;
         };
     } | {
-        questions: RefinementQuestion[];
+        questions: any;
     }>;
     generateAnalyticsSummary(formData: any, analyticsData: any): Promise<string>;
     private cleanMarkdownFormatting;

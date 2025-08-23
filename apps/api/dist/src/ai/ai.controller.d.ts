@@ -17,6 +17,6 @@ export declare class AiController {
             userId: string | null;
         };
     } | {
-        questions: import("./dto/refinement-question.dto").RefinementQuestion[];
+        questions: any;
     }>;
 }

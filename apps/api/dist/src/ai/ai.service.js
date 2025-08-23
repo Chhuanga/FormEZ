@@ -43,14 +43,24 @@ let AiService = class AiService {
             const result = await model.generateContent(prompt);
             const response = result.response;
             let text = response.text();
-            const jsonMatch = text.match(/\[.*\]/s);
-            if (jsonMatch && jsonMatch[0]) {
-                text = jsonMatch[0];
+            const jsonObjectMatch = text.match(/\{[\s\S]*\}/s);
+            const jsonArrayMatch = text.match(/\[[\s\S]*\]/s);
+            if (jsonArrayMatch && jsonArrayMatch[0]) {
+                text = jsonArrayMatch[0];
+            }
+            else if (jsonObjectMatch && jsonObjectMatch[0]) {
+                text = jsonObjectMatch[0];
             }
             else {
                 const markdownMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
                 if (markdownMatch && markdownMatch[1]) {
-                    text = markdownMatch[1];
+                    text = markdownMatch[1].trim();
+                }
+                else {
+                    const multipleObjectsMatch = text.match(/\{\s*"[\s\S]*\}\s*,[\s\S]*\{\s*"[\s\S]*\}/);
+                    if (multipleObjectsMatch) {
+                        text = `[${text.trim()}]`;
+                    }
                 }
             }
             return text;
@@ -70,7 +80,7 @@ let AiService = class AiService {
     getRefinementPrompt(userPrompt) {
         return `You are a form expert. A user has provided a prompt to create a form. Your first job is to determine if the prompt is too vague. A prompt is vague if it lacks a clear purpose or target audience (e.g., "make a form", "a feedback form"). A prompt is specific if it includes context (e.g., "a feedback form for my coffee shop", "a registration form for a webinar").
 
-    If the prompt is specific enough, respond with an empty JSON array: [].
+    If the prompt is specific enough, respond with exactly this: []
 
     If the prompt is vague, generate a JSON array of 2-3 clarifying questions to help the user. Each question should be an object with an "id" (a machine-friendly string) and a "question" (a user-friendly string).
 
@@ -80,13 +90,26 @@ let AiService = class AiService {
 
     User prompt: "${userPrompt}"
 
-    Output only the raw JSON array.`;
+    IMPORTANT: Output ONLY a valid JSON array. Start with [ and end with ]. Do not include any text before or after the JSON.`;
     }
     getFormGenerationPrompt(dto) {
         const answersPart = dto.answers
             ?.map((a) => `- Question: ${a.question}\n  - Answer: ${a.answer}`)
             .join('\n') || 'N/A';
-        return `You are an expert form builder assistant. Based on the user's request and their answers to clarifying questions, generate a JSON array of form fields.
+        return `You are an expert form builder assistant. Based on the user's request and their answers to clarifying questions, generate a JSON object containing both a title and form fields.
+
+    The response should be a JSON object with this structure:
+    {
+      "title": "A descriptive, contextual title for the form",
+      "fields": [array of form field objects]
+    }
+
+    Rules for the title:
+    - Should be professional and descriptive
+    - Should reflect the purpose and context of the form
+    - Should be concise (3-8 words typically)
+    - Should NOT include "AI:" prefix
+    - Examples: "Customer Feedback Survey", "Event Registration Form", "Employee Onboarding Form", "Product Review Form"
 
     Rules for fields:
     - "id" must be a unique, snake_case string.
@@ -118,18 +141,30 @@ let AiService = class AiService {
     Clarifying Answers:
     ${answersPart}
 
-    Output only the raw JSON array.`;
+    IMPORTANT: Output ONLY a valid JSON object. Start with { and end with }. Do not include any text before or after the JSON.`;
     }
     async generateForm(dto, user) {
         const prompt = this.getFormGenerationPrompt(dto);
         const rawResponse = await this.callGemini(prompt);
         try {
-            const generatedFields = JSON.parse(rawResponse);
-            const newForm = await this.formsService.create({
-                title: `AI: ${dto.prompt.substring(0, 40)}...`,
-                fields: generatedFields,
-            }, user.uid);
-            return { form: newForm };
+            const parsed = JSON.parse(rawResponse);
+            if (parsed.title && parsed.fields) {
+                const response = parsed;
+                const newForm = await this.formsService.create({
+                    title: response.title,
+                    fields: response.fields,
+                }, user.uid);
+                return { form: newForm };
+            }
+            if (Array.isArray(parsed)) {
+                const generatedFields = parsed;
+                const newForm = await this.formsService.create({
+                    title: `AI: ${dto.prompt.substring(0, 40)}...`,
+                    fields: generatedFields,
+                }, user.uid);
+                return { form: newForm };
+            }
+            throw new Error('Unexpected response format from AI');
         }
         catch (parseError) {
             console.error('Failed to parse form generation response as JSON:', rawResponse, parseError);
@@ -147,11 +182,26 @@ let AiService = class AiService {
             const refinementPrompt = this.getRefinementPrompt(dto.prompt);
             const rawResponse = await this.callGemini(refinementPrompt);
             try {
-                const questions = JSON.parse(rawResponse);
-                if (Array.isArray(questions) && questions.length === 0) {
+                let parsedQuestions;
+                try {
+                    parsedQuestions = JSON.parse(rawResponse);
+                }
+                catch (initialParseError) {
+                    const fixedResponse = rawResponse.trim().startsWith('[')
+                        ? rawResponse
+                        : `[${rawResponse}]`;
+                    try {
+                        parsedQuestions = JSON.parse(fixedResponse);
+                    }
+                    catch (secondParseError) {
+                        console.error('Failed to parse refinement response as JSON after fixing:', rawResponse, initialParseError);
+                        throw new common_1.InternalServerErrorException('AI failed to process the request. Please try again.');
+                    }
+                }
+                if (Array.isArray(parsedQuestions) && parsedQuestions.length === 0) {
                     return this.generateForm(dto, user);
                 }
-                return { questions };
+                return { questions: parsedQuestions };
             }
             catch (parseError) {
                 console.error('Failed to parse refinement response as JSON:', rawResponse, parseError);
@@ -218,7 +268,7 @@ let AiService = class AiService {
         const trendData = analyticsData?.submissionTrend || [];
         const recentTrend = trendData.slice(-7);
         const avgRecent = recentTrend.reduce((sum, day) => sum + (day?.count || 0), 0) / Math.max(recentTrend.length, 1);
-        return `You are an expert data analyst and user experience researcher. Analyze the following form analytics data and provide a comprehensive summary with insights and sentiment analysis.
+        return `You are an expert data analyst. Analyze the following form analytics data and provide a CONCISE summary with key insights.
 
 Form Information:
 - Title: "${formTitle}"
@@ -238,31 +288,30 @@ Submission Trends:
             ? trendData.reduce((max, day) => (day?.count || 0) > (max?.count || 0) ? day : max, { date: 'N/A', count: 0 })?.date || 'N/A'
             : 'N/A'}
 
-Please provide a comprehensive analysis that includes the following sections. For each section, start with the section name followed by a colon, then provide the analysis in clear, professional language:
+Please provide analysis for each section using bullet point format for better readability. Start each section with the section name followed by a colon:
 
-1. Overall Performance Summary: How is the form performing in terms of engagement and completion?
+1. Overall Performance Summary: Use 2-3 bullet points focusing on key performance metrics only.
 
-2. Statistical Insights: Key metrics and what they indicate about user behavior.
+2. Statistical Insights: Use 2-3 bullet points highlighting the most important numbers and what they mean.
 
-3. User Sentiment Analysis: Based on the response patterns and text analysis, what can you infer about user sentiment and satisfaction?
+3. User Sentiment Analysis: Use 4-5 bullet points covering sentiment patterns and engagement indicators.
 
-4. Response Pattern Analysis: What do the choice field responses tell us about user preferences and behavior?
+4. Response Pattern Analysis: Use 2-3 bullet points covering the main user choice patterns and behaviors.
 
-5. Recommendations: Specific actionable suggestions to improve form performance, user experience, or data collection.
+5. Recommendations: Use 4-5 bullet points with specific, actionable improvements and expected impact.
 
-6. Trends and Patterns: What temporal patterns or behavioral insights can you identify?
+6. Trends and Patterns: Use 4-5 bullet points covering behavioral insights and patterns from the data.
 
 IMPORTANT FORMATTING RULES:
 - Use PLAIN TEXT only - no markdown formatting
-- Do NOT use asterisks (*) or any other markdown symbols
-- Do NOT use bold (**text**) or italic (*text*) formatting
-- Simply write section names followed by a colon
-- Write in clear, professional language as if presenting to a business stakeholder
-- Focus on actionable insights and avoid overly technical jargon
-- If data is limited, acknowledge this and suggest ways to gather more meaningful insights
-- Use simple paragraph breaks for readability
+- Use simple dashes (-) for bullet points, not asterisks
+- Each bullet point should be one clear, complete thought
+- Write section names followed by a colon
+- Start each bullet point on a new line with "- " 
+- Use clear, professional language
+- Skip sections if data is insufficient
 
-Return the analysis as clean plain text without any formatting symbols.`;
+Return a concise analysis as clean plain text.`;
     }
 };
 exports.AiService = AiService;

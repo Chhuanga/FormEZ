@@ -50,6 +50,16 @@ export declare class FormsController {
         updatedAt: Date;
         userId: string | null;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    getCollaborationData(id: string, user: DecodedIdToken): Promise<{
+        id: string;
+        title: string;
+        fields: import("@prisma/client/runtime/library").JsonValue;
+        theme: import("@prisma/client/runtime/library").JsonValue;
+        formSettings: import("@prisma/client/runtime/library").JsonValue;
+        postSubmissionSettings: import("@prisma/client/runtime/library").JsonValue;
+        ownerId: string | null;
+        collaborators: string[];
+    }>;
     update(id: string, updateFormDto: UpdateFormDto, user: DecodedIdToken): Promise<{
         id: string;
         title: string;

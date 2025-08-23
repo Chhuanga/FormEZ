@@ -19,13 +19,17 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { BlockPalette } from './BlockPalette';
-import { FileText, Eye, Plus, Edit2 } from 'lucide-react';
+import { FileText, Eye, Plus, Edit2, Users } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { FormField as FormFieldComponent } from './FormField';
 import Link from 'next/link';
 import { SettingsSidebar } from './SettingsSidebar';
 import { Badge } from '@/components/ui/badge';
 import { ThemeSelector } from './ThemeSelector';
+import { CollaborationButton } from './CollaborationButton';
+import { CollaborationStatus } from './CollaborationStatus';
+import { CollaborativeCursors } from './CollaborativeCursors';
+import { useCollaboration } from '@/context/CollaborationContext';
 
 // A "tab-like" overlay for palette items
 function PaletteItemOverlay({
@@ -71,6 +75,7 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
     setPostSubmissionSettings,
   } = useFormStore();
   const { user } = useAuth();
+  const { sendCursorPosition, isCollaborating } = useCollaboration();
   const [formTitle, setFormTitle] = useState('Untitled Form');
   const [saving, setSaving] = useState(false);
   const [activeField, setActiveField] = useState<FormField | null>(null);
@@ -334,6 +339,11 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
                     </Link>
                   </Button>
 
+                  {/* Collaborate Button */}
+                  {initialData?.id && (
+                    <CollaborationButton formId={initialData.id} isOwner={true} />
+                  )}
+
                   {/* Preview Button */}
                   <Button variant="outline" size="sm" asChild id="preview-button">
                     <Link href={`/s/${initialData?.id}`} target="_blank">
@@ -348,8 +358,10 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
                   </div>
                 </div>
 
-                {/* Right: Save Button */}
-                <div className="flex items-center justify-end">
+                {/* Right: Save Button and Collaboration Status */}
+                <div className="flex items-center gap-3 justify-end">
+                  <CollaborationStatus />
+                  
                   <Button 
                     onClick={handleSave} 
                     disabled={saving}
@@ -374,7 +386,14 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           </header>
 
           {/* Main content */}
-          <main className="flex-1 flex min-h-0 overflow-hidden">
+          <main 
+            className="flex-1 flex min-h-0 overflow-hidden"
+            onMouseMove={(e) => {
+              if (isCollaborating) {
+                sendCursorPosition(e.clientX, e.clientY);
+              }
+            }}
+          >
             <div className="flex-1 relative min-w-0 overflow-y-auto">
               <Canvas id="form-canvas" formTitle={formTitle} />
             </div>
@@ -386,6 +405,10 @@ export function FormBuilder({ initialData }: FormBuilderProps) {
           </main>
         </div>
       </div>
+      
+      {/* Collaborative Cursors */}
+      <CollaborativeCursors />
+      
       <DragOverlay dropAnimation={defaultDropAnimation}>
         {activeField && <FormFieldComponent field={activeField} isOverlay />}
         {activePaletteItem && (
