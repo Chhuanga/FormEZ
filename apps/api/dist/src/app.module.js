@@ -17,6 +17,7 @@ const submissions_module_1 = require("./submissions/submissions.module");
 const files_module_1 = require("./files/files.module");
 const integrations_module_1 = require("./integrations/integrations.module");
 const ai_module_1 = require("./ai/ai.module");
+const collaboration_module_1 = require("./collaboration/collaboration.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,6 +34,7 @@ exports.AppModule = AppModule = __decorate([
             files_module_1.FilesModule,
             integrations_module_1.IntegrationsModule,
             ai_module_1.AiModule,
+            collaboration_module_1.CollaborationModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

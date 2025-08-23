@@ -26,19 +26,20 @@ let FormsService = class FormsService {
             update: {},
             create: {
                 id: userId,
-                email: `${userId}@firebase.temp`,
+                email: `${userId}@firebase.user`,
             },
         });
-        return this.prisma.form.create({
+        const form = await this.prisma.form.create({
             data: {
                 title: createFormDto.title,
-                fields: createFormDto.fields || [],
+                fields: createFormDto.fields,
                 theme: createFormDto.theme || {},
-                postSubmissionSettings: createFormDto.postSubmissionSettings ||
-                    undefined,
+                formSettings: createFormDto.formSettings || {},
+                postSubmissionSettings: createFormDto.postSubmissionSettings || {},
                 userId,
             },
         });
+        return form;
     }
     async logFormView(formId) {
         const form = await this.prisma.form.findUnique({
@@ -70,6 +71,32 @@ let FormsService = class FormsService {
         return this.prisma.form.findUnique({
             where: { id },
         });
+    }
+    async findOneForCollaboration(id, userId) {
+        const form = await this.prisma.form.findUnique({
+            where: { id },
+            include: {
+                collaborators: true,
+            },
+        });
+        if (!form) {
+            throw new common_1.NotFoundException('Form not found');
+        }
+        const isOwner = form.userId === userId;
+        const isCollaborator = form.collaborators.some(c => c.userId === userId);
+        if (!isOwner && !isCollaborator) {
+            throw new common_1.NotFoundException('Access denied');
+        }
+        return {
+            id: form.id,
+            title: form.title,
+            fields: form.fields,
+            theme: form.theme,
+            formSettings: form.formSettings,
+            postSubmissionSettings: form.postSubmissionSettings,
+            ownerId: form.userId,
+            collaborators: form.collaborators.map(c => c.userId),
+        };
     }
     async update(id, userId, updateFormDto) {
         const form = await this.prisma.form.findUnique({

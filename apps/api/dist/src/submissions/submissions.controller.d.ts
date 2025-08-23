@@ -29,7 +29,7 @@ export declare class SubmissionsController {
             label: string;
             type: string;
             options: {
-                option: string;
+                option: any;
                 count: number;
             }[];
         }[];

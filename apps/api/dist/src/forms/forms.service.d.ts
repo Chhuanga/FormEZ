@@ -52,6 +52,16 @@ export declare class FormsService {
         updatedAt: Date;
         userId: string | null;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
+    findOneForCollaboration(id: string, userId: string): Promise<{
+        id: string;
+        title: string;
+        fields: Prisma.JsonValue;
+        theme: Prisma.JsonValue;
+        formSettings: Prisma.JsonValue;
+        postSubmissionSettings: Prisma.JsonValue;
+        ownerId: string | null;
+        collaborators: string[];
+    }>;
     update(id: string, userId: string, updateFormDto: UpdateFormDto): Promise<{
         id: string;
         title: string;

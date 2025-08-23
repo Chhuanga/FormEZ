@@ -211,8 +211,8 @@ let SubmissionsService = class SubmissionsService {
             if (['RadioGroup', 'Select', 'Checkbox'].includes(field.type)) {
                 const counts = new Map();
                 field.options?.forEach((option) => {
-                    const optionValue = typeof option === 'string' ? option : option.value;
-                    counts.set(optionValue, 0);
+                    const optionKey = typeof option === 'string' ? option : JSON.stringify(option);
+                    counts.set(optionKey, 0);
                 });
                 choiceFieldAnalytics.set(field.id, counts);
             }
@@ -238,9 +238,22 @@ let SubmissionsService = class SubmissionsService {
                         ? answer.value
                         : [answer.value];
                     const counts = choiceFieldAnalytics.get(field.id);
-                    answerValues.forEach((value) => {
-                        if (counts.has(value)) {
-                            counts.set(value, counts.get(value) + 1);
+                    answerValues.forEach((submittedValue) => {
+                        const matchingOption = field.options?.find((opt) => {
+                            if (typeof opt === 'string') {
+                                return opt === submittedValue;
+                            }
+                            else {
+                                return opt.value === submittedValue || opt.label === submittedValue;
+                            }
+                        });
+                        if (matchingOption) {
+                            const optionKey = typeof matchingOption === 'string'
+                                ? matchingOption
+                                : JSON.stringify(matchingOption);
+                            if (counts.has(optionKey)) {
+                                counts.set(optionKey, counts.get(optionKey) + 1);
+                            }
                         }
                     });
                 }
@@ -267,10 +280,18 @@ let SubmissionsService = class SubmissionsService {
             fieldId,
             label: fieldMap.get(fieldId).label,
             type: fieldMap.get(fieldId).type,
-            options: Array.from(counts.entries()).map(([option, count]) => ({
-                option,
-                count,
-            })),
+            options: Array.from(counts.entries()).map(([optionKey, count]) => {
+                try {
+                    const parsedOption = JSON.parse(optionKey);
+                    return {
+                        option: parsedOption.label || parsedOption.value || parsedOption,
+                        count
+                    };
+                }
+                catch (e) {
+                    return { option: optionKey, count };
+                }
+            }),
         }));
         const finalTextAnalytics = Array.from(textFieldAnalytics.entries()).map(([fieldId, wordCounts]) => ({
             fieldId,

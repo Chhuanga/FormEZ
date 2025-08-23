@@ -81,6 +81,39 @@ export class FormsService {
     });
   }
 
+  async findOneForCollaboration(id: string, userId: string) {
+    // First check if form exists and user has access
+    const form = await this.prisma.form.findUnique({
+      where: { id },
+      include: {
+        collaborators: true,
+      },
+    });
+
+    if (!form) {
+      throw new NotFoundException('Form not found');
+    }
+
+    // Check if user is owner or collaborator
+    const isOwner = form.userId === userId;
+    const isCollaborator = form.collaborators.some(c => c.userId === userId);
+
+    if (!isOwner && !isCollaborator) {
+      throw new NotFoundException('Access denied'); // Don't reveal form exists
+    }
+
+    return {
+      id: form.id,
+      title: form.title,
+      fields: form.fields,
+      theme: form.theme,
+      formSettings: form.formSettings,
+      postSubmissionSettings: form.postSubmissionSettings,
+      ownerId: form.userId,
+      collaborators: form.collaborators.map(c => c.userId),
+    };
+  }
+
   async update(id: string, userId: string, updateFormDto: UpdateFormDto) {
     // First, verify the form belongs to the user
     const form = await this.prisma.form.findUnique({
